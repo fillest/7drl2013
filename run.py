@@ -1,44 +1,82 @@
 import sys
 import os
 os.chdir("libtcod-1.5.2")
-# sys.path.append("libtcod-1.5.2/python") 
+# sys.path.append("tcod-1.5.2/python") 
 sys.path.append("python") 
-import libtcodpy as libtcod
+import libtcodpy as tcod
+import random
 
 
-libtcod.sys_set_fps(60)
-libtcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-libtcod.console_init_root(80, 50, 'python/libtcod tutorial', False)
+tcod.sys_set_fps(60)
+tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
+tcod.console_init_root(80, 50, 'TD RL', False)
 
-# c1 = libtcod.Color(255, 255, 255)
-# libtcod.console_set_default_background(0, c1)
-# libtcod.console_clear(0)
+# c1 = tcod.Color(255, 255, 255)
+# tcod.console_set_default_background(0, c1)
+# tcod.console_clear(0)
 
-world_map = [
-	['.'] * 10,
-] * 10
 
 class color (object):
-	grass = libtcod.Color(50, 150, 50)
+	grass = tcod.Color(50, 150, 50)
 
-key = libtcod.Key()
-mouse = libtcod.Mouse()
-while not libtcod.console_is_window_closed():
-	libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
-	if key.vk == libtcod.KEY_ESCAPE:
+tile_types = dict(
+	grass = dict(
+		sym = '.',
+		color = color.grass,
+	)
+)
+
+world_map = [
+	['grass'] * 60,
+] * 40
+
+
+class Timer (object):
+	def __init__ (self, interval, cb):
+		self.cb = cb
+		self.interval = interval
+		self.last_time = None
+
+	def start (self):
+		self.last_time = tcod.sys_elapsed_milli()
+		return self
+
+	def update (self):
+		cur_time = tcod.sys_elapsed_milli()
+		#
+		# last_time = cur_time
+		#
+		if cur_time - self.last_time >= self.interval:
+			self.cb()
+			self.last_time = cur_time
+
+testc = [tcod.Color(255, 255, 255)]
+def cb ():
+	testc[0] = tcod.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+t = Timer(500, cb).start()
+
+
+key = tcod.Key()
+mouse = tcod.Mouse()
+while not tcod.console_is_window_closed():
+	ev = tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse) #TODO loop?
+	if key.vk == tcod.KEY_ESCAPE:
 		break
+
+	t.update()
 
 	if mouse.lbutton_pressed:
 		print "left mouse, cell:", mouse.cx, mouse.cy
 
 
 	for y, row in enumerate(world_map):
-		for x, cell in enumerate(row):
-			libtcod.console_put_char(0, x + 1, y + 1, cell, libtcod.BKGND_NONE)
-			libtcod.console_set_char_foreground(0, x + 1, y + 1, color.grass)
-			# libtcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
+		for x, tile_type in enumerate(row):
+			tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
+			tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
+			# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
-	libtcod.console_put_char(0, 1, 1, '@', libtcod.BKGND_NONE)
+	tcod.console_put_char(0, 1, 1, '@', tcod.BKGND_NONE)
+	tcod.console_set_char_foreground(0, 1, 1, testc[0])
 
 
-	libtcod.console_flush()
+	tcod.console_flush()
