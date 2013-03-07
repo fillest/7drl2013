@@ -32,10 +32,11 @@ world_map = [
 
 
 class Timer (object):
-	def __init__ (self, interval, cb):
+	def __init__ (self, interval, cb, args = None):
 		self.cb = cb
 		self.interval = interval
 		self.last_time = None
+		self.args = args or ()
 
 	def start (self):
 		self.last_time = tcod.sys_elapsed_milli()
@@ -47,7 +48,7 @@ class Timer (object):
 		# last_time = cur_time
 		#
 		if cur_time - self.last_time >= self.interval:
-			self.cb()
+			self.cb(*self.args)
 			self.last_time = cur_time
 
 testc = [tcod.Color(255, 255, 255)]
@@ -61,9 +62,9 @@ def clamp (value, min_value, max_value):
 	return max(min(value, max_value), min_value)
 
 class Enemy (object):
-	def __init__ (self):
-		self.x = 1
-		self.y = 1
+	def __init__ (self, x, y):
+		self.x = x
+		self.y = y
 
 		timers.append(Timer(500, self._move).start())
 
@@ -79,8 +80,26 @@ class Enemy (object):
 		tcod.console_set_char_foreground(0, self.x, self.y, testc[0])
 
 enemies = []
-enemies.append(Enemy())
-enemies.append(Enemy())
+enemies.append(Enemy(1, 1))
+enemies.append(Enemy(1, 15))
+
+missiles = []
+def shoot (e):
+	m = [20, 20]
+	missiles.append(m)
+
+	def update_missile ():
+		tcod.line_init(m[0], m[1], e.x, e.y)
+		x, y = tcod.line_step()
+		if x is None:
+			# missiles.remove(m)
+			return
+
+		m[0] = x
+		m[1] = y
+	timers.append(Timer(20, update_missile).start())
+timers.append(Timer(1200, shoot, [enemies[0]]).start())
+timers.append(Timer(1500, shoot, [enemies[1]]).start())
 
 
 key = tcod.Key()
@@ -101,9 +120,17 @@ while not tcod.console_is_window_closed():
 			tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
 			# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
+	for m in missiles:
+		x, y = m
+		tcod.console_put_char(0, x, y, '*', tcod.BKGND_NONE)
+		tcod.console_set_char_foreground(0, x, y, tcod.Color(255, 0, 0))
+
 	for e in enemies:
 		e.update()
 		e.render()
+
+	tcod.console_put_char(0, 20, 20, '@', tcod.BKGND_NONE)
+	tcod.console_set_char_foreground(0, 20, 20, tcod.Color(255, 255, 255))
 
 	for t in timers:
 		t.update()
