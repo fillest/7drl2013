@@ -53,7 +53,34 @@ class Timer (object):
 testc = [tcod.Color(255, 255, 255)]
 def cb ():
 	testc[0] = tcod.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-t = Timer(500, cb).start()
+t = Timer(1000, cb).start()
+
+timers = [t]
+
+def clamp (value, min_value, max_value):
+	return max(min(value, max_value), min_value)
+
+class Enemy (object):
+	def __init__ (self):
+		self.x = 1
+		self.y = 1
+
+		timers.append(Timer(500, self._move).start())
+
+	def _move (self):
+		self.x = clamp(self.x + random.randint(-1, 1), 1, 10)
+		self.y = clamp(self.y + random.randint(-1, 1), 1, 10)
+
+	def update (self):
+		pass
+
+	def render (self):
+		tcod.console_put_char(0, self.x, self.y, '@', tcod.BKGND_NONE)
+		tcod.console_set_char_foreground(0, self.x, self.y, testc[0])
+
+enemies = []
+enemies.append(Enemy())
+enemies.append(Enemy())
 
 
 key = tcod.Key()
@@ -62,8 +89,7 @@ while not tcod.console_is_window_closed():
 	ev = tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse) #TODO loop?
 	if key.vk == tcod.KEY_ESCAPE:
 		break
-
-	t.update()
+	
 
 	if mouse.lbutton_pressed:
 		print "left mouse, cell:", mouse.cx, mouse.cy
@@ -75,8 +101,12 @@ while not tcod.console_is_window_closed():
 			tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
 			# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
-	tcod.console_put_char(0, 1, 1, '@', tcod.BKGND_NONE)
-	tcod.console_set_char_foreground(0, 1, 1, testc[0])
+	for e in enemies:
+		e.update()
+		e.render()
+
+	for t in timers:
+		t.update()
 
 
 	tcod.console_flush()
