@@ -18,27 +18,37 @@ class Timer (object):
 
 	def update (self):
 		cur_time = tcod.sys_elapsed_milli()
+		#TODO buffering + dont forget pause
 		#
 		# last_time = cur_time
 		#
 		if cur_time - self.last_time >= self.interval:
-			self.cb(*self.args)
+			result = self.cb(*self.args)
+			if result:
+				return result
 			self.last_time = cur_time
 
-class Enemy (object):
-	def __init__ (self, state, x, y):
+class Timers (list):
+	def start (self, interval, cb, args = None):
+		self.append(Timer(interval, cb, args).start())
+
+class Entity (object):
+	def __init__ (self, state, x, y, sym, color = tcod.white):
 		self.x = x
 		self.y = y
+		self.sym = sym
+		self.state = state
+		self.color = color
 
-		state.timers.append(Timer(500, self._move).start())
+	def render (self):
+		tcod.console_put_char(0, self.x, self.y, self.sym, tcod.BKGND_NONE)
+		tcod.console_set_char_foreground(0, self.x, self.y, self.color)
+
+class Enemy (Entity):
+	def __init__(self, *args):
+		super(Enemy, self).__init__(*args)
+		self.state.timers.start(500, self._move)
 
 	def _move (self):
 		self.x = clamp(self.x + random.randint(-1, 1), 1, 10)
 		self.y = clamp(self.y + random.randint(-1, 1), 1, 10)
-
-	def update (self):
-		pass
-
-	def render (self):
-		tcod.console_put_char(0, self.x, self.y, '@', tcod.BKGND_NONE)
-		tcod.console_set_char_foreground(0, self.x, self.y, tcod.Color(255, 255, 255))

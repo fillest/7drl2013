@@ -8,96 +8,92 @@ import random
 import util
 
 
-tcod.sys_set_fps(60)
-tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
-tcod.console_init_root(80, 50, 'TD RL', False)
-
-# c1 = tcod.Color(255, 255, 255)
-# tcod.console_set_default_background(0, c1)
-# tcod.console_clear(0)
-
-
-class color (object):
-	grass = tcod.Color(50, 150, 50)
-	white = tcod.Color(255, 255, 255)
-
 tile_types = dict(
 	grass = dict(
 		sym = '.',
-		color = color.grass,
+		color = tcod.darker_green,
 	)
 )
 
-w, h = 60, 40
-world_map = [
-	['grass'] * w,
-] * h
-
-
-timers = []
-
-class State (object):
+class state (object):
 	pass
 
-state = State()
-state.timers = timers
+def run ():
+	tcod.sys_set_fps(60)
+	tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
+	tcod.console_init_root(80, 50, 'TD RL', False)
 
-enemies = []
-enemies.append(util.Enemy(state, 1, 1))
-enemies.append(util.Enemy(state, 1, 15))
-
-missiles = []
-def shoot (e):
-	m = [20, 20]
-	missiles.append(m)
-
-	def update_missile ():
-		tcod.line_init(m[0], m[1], e.x, e.y)
-		x, y = tcod.line_step()
-		if x is None:
-			# missiles.remove(m)
-			return
-
-		m[0] = x
-		m[1] = y
-	missile_speed = 20
-	timers.append(util.Timer(missile_speed, update_missile).start())
-timers.append(util.Timer(1200, shoot, [enemies[0]]).start())
-timers.append(util.Timer(1500, shoot, [enemies[1]]).start())
+	# c1 = tcod.Color(255, 255, 255)
+	# tcod.console_set_default_background(0, c1)
+	# tcod.console_clear(0)
 
 
-key = tcod.Key()
-mouse = tcod.Mouse()
-while not tcod.console_is_window_closed():
-	ev = tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse) #TODO loop?
-	if key.vk == tcod.KEY_ESCAPE:
-		break
-	
-
-	if mouse.lbutton_pressed:
-		print "left mouse, cell:", mouse.cx, mouse.cy
+	w, h = 60, 40
+	world_map = [
+		['grass'] * w,
+	] * h
 
 
-	for t in timers:
-		t.update()
-		
-	for y, row in enumerate(world_map):
-		for x, tile_type in enumerate(row):
-			tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
-			tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
-			# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
-
-	for m in missiles:
-		x, y = m
-		tcod.console_put_char(0, x, y, '*', tcod.BKGND_NONE)
-		tcod.console_set_char_foreground(0, x, y, tcod.Color(255, 0, 0))
-
-	for e in enemies:
-		e.update()
-		e.render()
-
-	tcod.console_put_char(0, 20, 20, '@', tcod.BKGND_NONE)
-	tcod.console_set_char_foreground(0, 20, 20, color.white)
+	state.timers = util.Timers()
+	state.is_paused = False
 
 
-	tcod.console_flush()
+	entities = []
+
+	entities.append(util.Enemy(state, 1, 1, '@'))
+	entities.append(util.Enemy(state, 1, 15, 'r'))
+
+	entities.append(util.Entity(state, 20, 20, '@', tcod.dark_green))
+
+
+	def shoot (e):
+		m = util.Entity(state, 20, 20, '*', tcod.yellow)
+		entities.append(m)
+
+		def update_missile ():
+			tcod.line_init(m.x, m.y, e.x, e.y)
+			x, y = tcod.line_step()
+			if x is None:
+				entities.remove(m)
+				return True
+
+			m.x = x
+			m.y = y
+		missile_speed = 20
+		state.timers.start(missile_speed, update_missile)
+	state.timers.start(1200, shoot, [entities[0]])
+	state.timers.start(1500, shoot, [entities[1]])
+
+
+	key = tcod.Key()
+	mouse = tcod.Mouse()
+	while not tcod.console_is_window_closed():
+		ev = tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse) #TODO loop?
+		if key.vk == tcod.KEY_ESCAPE:
+			break
+		elif key.vk == tcod.KEY_SPACE:
+			state.is_paused = not state.is_paused
+
+		if mouse.lbutton_pressed:
+			print "left mouse, cell:", mouse.cx, mouse.cy
+
+
+		if not state.is_paused:
+			for t in list(state.timers):
+				if t.update():
+					state.timers.remove(t)
+
+		for y, row in enumerate(world_map):
+			for x, tile_type in enumerate(row):
+				tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
+				tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
+				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
+
+		for e in entities:
+			e.render()
+
+
+		tcod.console_flush()
+
+if __name__ == '__main__':
+	run()
