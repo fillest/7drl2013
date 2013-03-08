@@ -5,6 +5,7 @@ os.chdir("libtcod-1.5.2")
 sys.path.append("python") 
 import libtcodpy as tcod
 import random
+import util
 
 
 tcod.sys_set_fps(60)
@@ -18,6 +19,7 @@ tcod.console_init_root(80, 50, 'TD RL', False)
 
 class color (object):
 	grass = tcod.Color(50, 150, 50)
+	white = tcod.Color(255, 255, 255)
 
 tile_types = dict(
 	grass = dict(
@@ -31,46 +33,24 @@ world_map = [
 ] * 40
 
 
-class Timer (object):
-	def __init__ (self, interval, cb, args = None):
-		self.cb = cb
-		self.interval = interval
-		self.last_time = None
-		self.args = args or ()
-
-	def start (self):
-		self.last_time = tcod.sys_elapsed_milli()
-		return self
-
-	def update (self):
-		cur_time = tcod.sys_elapsed_milli()
-		#
-		# last_time = cur_time
-		#
-		if cur_time - self.last_time >= self.interval:
-			self.cb(*self.args)
-			self.last_time = cur_time
-
 testc = [tcod.Color(255, 255, 255)]
 def cb ():
 	testc[0] = tcod.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-t = Timer(1000, cb).start()
+t = util.Timer(1000, cb).start()
 
 timers = [t]
 
-def clamp (value, min_value, max_value):
-	return max(min(value, max_value), min_value)
 
 class Enemy (object):
 	def __init__ (self, x, y):
 		self.x = x
 		self.y = y
 
-		timers.append(Timer(500, self._move).start())
+		timers.append(util.Timer(500, self._move).start())
 
 	def _move (self):
-		self.x = clamp(self.x + random.randint(-1, 1), 1, 10)
-		self.y = clamp(self.y + random.randint(-1, 1), 1, 10)
+		self.x = util.clamp(self.x + random.randint(-1, 1), 1, 10)
+		self.y = util.clamp(self.y + random.randint(-1, 1), 1, 10)
 
 	def update (self):
 		pass
@@ -97,9 +77,9 @@ def shoot (e):
 
 		m[0] = x
 		m[1] = y
-	timers.append(Timer(20, update_missile).start())
-timers.append(Timer(1200, shoot, [enemies[0]]).start())
-timers.append(Timer(1500, shoot, [enemies[1]]).start())
+	timers.append(util.Timer(20, update_missile).start())
+timers.append(util.Timer(1200, shoot, [enemies[0]]).start())
+timers.append(util.Timer(1500, shoot, [enemies[1]]).start())
 
 
 key = tcod.Key()
@@ -130,7 +110,7 @@ while not tcod.console_is_window_closed():
 		e.render()
 
 	tcod.console_put_char(0, 20, 20, '@', tcod.BKGND_NONE)
-	tcod.console_set_char_foreground(0, 20, 20, tcod.Color(255, 255, 255))
+	tcod.console_set_char_foreground(0, 20, 20, color.white)
 
 	for t in timers:
 		t.update()
