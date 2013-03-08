@@ -28,9 +28,10 @@ tile_types = dict(
 	)
 )
 
+w, h = 60, 40
 world_map = [
-	['grass'] * 60,
-] * 40
+	['grass'] * w,
+] * h
 
 
 timers = []
@@ -77,6 +78,9 @@ while not tcod.console_is_window_closed():
 		print "left mouse, cell:", mouse.cx, mouse.cy
 
 
+	for t in timers:
+		t.update()
+		
 	for y, row in enumerate(world_map):
 		for x, tile_type in enumerate(row):
 			tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
@@ -94,9 +98,6 @@ while not tcod.console_is_window_closed():
 
 	tcod.console_put_char(0, 20, 20, '@', tcod.BKGND_NONE)
 	tcod.console_set_char_foreground(0, 20, 20, color.white)
-
-	for t in timers:
-		t.update()
 
 
 	tcod.console_flush()
