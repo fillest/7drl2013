@@ -33,35 +33,17 @@ world_map = [
 ] * 40
 
 
-testc = [tcod.Color(255, 255, 255)]
-def cb ():
-	testc[0] = tcod.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-t = util.Timer(1000, cb).start()
+timers = []
 
-timers = [t]
+class State (object):
+	pass
 
-
-class Enemy (object):
-	def __init__ (self, x, y):
-		self.x = x
-		self.y = y
-
-		timers.append(util.Timer(500, self._move).start())
-
-	def _move (self):
-		self.x = util.clamp(self.x + random.randint(-1, 1), 1, 10)
-		self.y = util.clamp(self.y + random.randint(-1, 1), 1, 10)
-
-	def update (self):
-		pass
-
-	def render (self):
-		tcod.console_put_char(0, self.x, self.y, '@', tcod.BKGND_NONE)
-		tcod.console_set_char_foreground(0, self.x, self.y, testc[0])
+state = State()
+state.timers = timers
 
 enemies = []
-enemies.append(Enemy(1, 1))
-enemies.append(Enemy(1, 15))
+enemies.append(util.Enemy(state, 1, 1))
+enemies.append(util.Enemy(state, 1, 15))
 
 missiles = []
 def shoot (e):
@@ -77,7 +59,8 @@ def shoot (e):
 
 		m[0] = x
 		m[1] = y
-	timers.append(util.Timer(20, update_missile).start())
+	missile_speed = 20
+	timers.append(util.Timer(missile_speed, update_missile).start())
 timers.append(util.Timer(1200, shoot, [enemies[0]]).start())
 timers.append(util.Timer(1500, shoot, [enemies[1]]).start())
 
