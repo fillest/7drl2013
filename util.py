@@ -44,11 +44,14 @@ class Entity (object):
 		tcod.console_put_char(0, self.x, self.y, self.sym, tcod.BKGND_NONE)
 		tcod.console_set_char_foreground(0, self.x, self.y, self.color)
 
+	def update (self):
+		pass
+
 class Enemy (Entity):
 	def __init__(self, *args):
 		super(Enemy, self).__init__(*args)
 		self.state.timers.start(500, self._move)
 
 	def _move (self):
-		self.x = clamp(self.x + random.randint(-1, 1), 1, 10)
-		self.y = clamp(self.y + random.randint(-1, 1), 1, 10)
+		self.x = clamp(self.x + random.randint(-1, 1), 1, 50)
+		self.y = clamp(self.y + random.randint(-1, 1), 1, 30)

@@ -7,6 +7,7 @@ sys.path.append("python")
 import libtcodpy as tcod
 libtcod = tcod
 import random
+from random import randint
 import util
 
 
@@ -42,31 +43,49 @@ def run ():
 
 	entities = []
 
+	#enemies
+	def spawn_enemy ():
+		x = random.choice(range(0, 3 + 1) + range(48, 50 + 1))
+		y = random.choice(range(0, 3 + 1) + range(28, 30 + 1))
+		entities.append(util.Enemy(state, x, y, 'r'))
+	state.timers.start(1000, spawn_enemy)
+
 	entities.append(util.Enemy(state, 1, 1, '@'))
-	entities.append(util.Enemy(state, 1, 15, 'r'))
-
-	entities.append(util.Entity(state, 20, 20, '@', tcod.dark_green))
+	entities.append(util.Enemy(state, 1, 15, '@'))
 
 
-	def shoot (e):
-		m = util.Entity(state, 20, 20, '*', tcod.yellow)
-		entities.append(m)
+	#towers
+	class Tower (util.Entity):
+		def __init__(self, *args):
+			super(Tower, self).__init__(*args)
+			self.targeted = set()
 
-		def update_missile ():
-			tcod.line_init(m.x, m.y, e.x, e.y)
-			x, y = tcod.line_step()
-			if x is None:
-				entities.remove(m)
-				return True
+		def update (self):
+			for e in entities:
+				if isinstance(e, util.Enemy) and e not in self.targeted:
+					self.targeted.add(e)
+					state.timers.start(1200, self._shoot, [e])
 
-			m.x = x
-			m.y = y
-		missile_speed = 20
-		state.timers.start(missile_speed, update_missile)
-	state.timers.start(1200, shoot, [entities[0]])
-	state.timers.start(1500, shoot, [entities[1]])
+		def _shoot (self, e):
+			m = util.Entity(state, 20, 20, '*', tcod.yellow)
+			entities.append(m)
+
+			def update_missile ():
+				tcod.line_init(m.x, m.y, e.x, e.y)
+				x, y = tcod.line_step()
+				if x is None:
+					entities.remove(m)
+					return True
+
+				m.x = x
+				m.y = y
+			missile_speed = 20
+			state.timers.start(missile_speed, update_missile)
+
+	entities.append(Tower(state, 20, 20, '@', tcod.dark_green))
 
 
+	#panel
 	pan_w = 50
 	pan_h = 10
 	panel = tcod.console_new(pan_w, pan_h)
@@ -76,9 +95,11 @@ def run ():
 	tcod.console_rect(panel, 0, 0, pan_w, pan_h, False, tcod.BKGND_SCREEN)
 	# tcod.console_set_default_background(panel, tcod.black)
 
+
 	key = tcod.Key()
 	mouse = tcod.Mouse()
 	while not tcod.console_is_window_closed():
+		#handle input
 		ev = tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse) #TODO loop?
 		if key.vk == tcod.KEY_ESCAPE:
 			break
@@ -91,12 +112,16 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-
+		#update
 		if not state.is_paused:
 			for t in list(state.timers):
 				if t.update():
 					state.timers.remove(t)
 
+		for e in entities:
+			e.update()
+
+		#render
 		for y, row in enumerate(world_map):
 			for x, tile_type in enumerate(row):
 				tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
