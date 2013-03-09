@@ -68,9 +68,7 @@ def run ():
 				target = None
 				for e in entities:
 					if isinstance(e, util.Enemy):
-						#TODO seems buggy maybe due to console char grid spaces?
-						dist = util.dist(e.x, self.x, e.y, self.y)
-
+						dist = util.dist(self.x, self.y, e.x, e.y)
 						if dist < dist_min:
 							dist_min = dist
 							target = e
