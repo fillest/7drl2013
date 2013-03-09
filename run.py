@@ -1,9 +1,11 @@
+#coding: utf-8
 import sys
 import os
 os.chdir("libtcod-1.5.2")
 # sys.path.append("tcod-1.5.2/python") 
 sys.path.append("python") 
 import libtcodpy as tcod
+libtcod = tcod
 import random
 import util
 
@@ -65,6 +67,15 @@ def run ():
 	state.timers.start(1500, shoot, [entities[1]])
 
 
+	pan_w = 50
+	pan_h = 10
+	panel = tcod.console_new(pan_w, pan_h)
+	tcod.console_set_default_foreground(panel, tcod.white)
+
+	tcod.console_set_default_background(panel, tcod.Color(5, 5, 5))
+	tcod.console_rect(panel, 0, 0, pan_w, pan_h, False, tcod.BKGND_SCREEN)
+	# tcod.console_set_default_background(panel, tcod.black)
+
 	key = tcod.Key()
 	mouse = tcod.Mouse()
 	while not tcod.console_is_window_closed():
@@ -73,6 +84,9 @@ def run ():
 			break
 		elif key.vk == tcod.KEY_SPACE:
 			state.is_paused = not state.is_paused
+
+			new_msg_lines = textwrap.wrap("hellokitten and fuck you", 5)
+
 
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
@@ -91,6 +105,10 @@ def run ():
 
 		for e in entities:
 			e.render()
+
+		tcod.console_print_ex(panel, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
+		# tcod.console_print_ex(panel, 0, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
+		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 40)
 
 
 		tcod.console_flush()
