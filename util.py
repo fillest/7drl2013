@@ -1,9 +1,13 @@
 import libtcodpy as tcod
 import random
+import math
 
 
 def clamp (value, min_value, max_value):
 	return max(min(value, max_value), min_value)
+
+def dist (x1, y1, x2, y2):
+	return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
 class Timer (object):
 	def __init__ (self, interval, cb, args = None):

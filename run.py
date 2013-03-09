@@ -9,6 +9,7 @@ libtcod = tcod
 import random
 from random import randint
 import util
+import math
 
 
 tile_types = dict(
@@ -39,35 +40,52 @@ def run ():
 
 	state.timers = util.Timers()
 	state.is_paused = False
-
-
 	entities = []
 
-	#enemies
-	def spawn_enemy ():
-		x = random.choice(range(0, 3 + 1) + range(48, 50 + 1))
-		y = random.choice(range(0, 3 + 1) + range(28, 30 + 1))
-		entities.append(util.Enemy(state, x, y, 'r'))
-	state.timers.start(1000, spawn_enemy)
 
-	entities.append(util.Enemy(state, 1, 1, '@'))
-	entities.append(util.Enemy(state, 1, 15, '@'))
+	#enemies
+	map_sides = [
+		lambda: (randint(1, 50), 1), #top
+		lambda: (randint(1, 50), 30), #bottom
+		lambda: (1, randint(1, 30)), #left
+		lambda: (50, randint(1, 30)), #right
+	]
+	def spawn_enemy ():
+		x, y = random.choice(map_sides)()
+		entities.append(util.Enemy(state, x, y, 'r'))
+	state.timers.start(500, spawn_enemy)
 
 
 	#towers
 	class Tower (util.Entity):
 		def __init__(self, *args):
 			super(Tower, self).__init__(*args)
-			self.targeted = set()
+			self.cooldown = False
 
 		def update (self):
-			for e in entities:
-				if isinstance(e, util.Enemy) and e not in self.targeted:
-					self.targeted.add(e)
-					state.timers.start(1200, self._shoot, [e])
+			if not self.cooldown:
+				dist_min = 9000
+				target = None
+				for e in entities:
+					if isinstance(e, util.Enemy):
+						#TODO seems buggy maybe due to console char grid spaces?
+						dist = util.dist(e.x, self.x, e.y, self.y)
+
+						if dist < dist_min:
+							dist_min = dist
+							target = e
+				
+				if target:
+					self._shoot(target)
 
 		def _shoot (self, e):
-			m = util.Entity(state, 20, 20, '*', tcod.yellow)
+			self.cooldown = True
+			def clear_cd ():
+				self.cooldown = False
+				return True
+			state.timers.start(1000, clear_cd)
+
+			m = util.Entity(state, self.x, self.y, '*', tcod.yellow)
 			entities.append(m)
 
 			def update_missile ():
@@ -75,14 +93,19 @@ def run ():
 				x, y = tcod.line_step()
 				if x is None:
 					entities.remove(m)
-					return True
 
-				m.x = x
-				m.y = y
+					if e in entities:
+						entities.remove(e)
+					
+					return True
+				else:
+					m.x = x
+					m.y = y
 			missile_speed = 20
 			state.timers.start(missile_speed, update_missile)
 
-	entities.append(Tower(state, 20, 20, '@', tcod.dark_green))
+	te = Tower(state, 20, 20, '@', tcod.dark_green)
+	entities.append(te)
 
 
 	#panel
@@ -105,12 +128,11 @@ def run ():
 			break
 		elif key.vk == tcod.KEY_SPACE:
 			state.is_paused = not state.is_paused
-
-			new_msg_lines = textwrap.wrap("hellokitten and fuck you", 5)
-
+			#TODO after log pause shoots two times -- its now remade but seems timer+pause is buggy
 
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
+
 
 		#update
 		if not state.is_paused:
@@ -130,6 +152,11 @@ def run ():
 
 		for e in entities:
 			e.render()
+
+		if state.is_paused:
+			tcod.console_print_ex(0, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "paused")
+		else:
+			tcod.console_print_ex(0, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, " " * 10)
 
 		tcod.console_print_ex(panel, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
 		# tcod.console_print_ex(panel, 0, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
