@@ -57,5 +57,5 @@ class Enemy (Entity):
 		self.state.timers.start(500, self._move)
 
 	def _move (self):
-		self.x = clamp(self.x + random.randint(-1, 1), 1, 50)
-		self.y = clamp(self.y + random.randint(-1, 1), 1, 30)
+		self.x = clamp(self.x + random.randint(-1, 1), 0, self.state.map.w - 1)
+		self.y = clamp(self.y + random.randint(-1, 1), 0, self.state.map.h - 1)

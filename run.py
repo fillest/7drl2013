@@ -22,6 +22,24 @@ tile_types = dict(
 class state (object):
 	pass
 
+class Map (object):
+	def __init__ (self, w, h):
+		assert w % 2 == 1
+		assert h % 2 == 1
+		self.w = w
+		self.h = h
+
+		self.tiles = [
+			['grass'] * w,
+		] * h
+
+	def render (self):
+		for y, row in enumerate(self.tiles):
+			for x, tile_type in enumerate(row):
+				tcod.console_put_char(0, x, y, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
+				tcod.console_set_char_foreground(0, x, y, tile_types[tile_type]['color'])
+				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
+
 def run ():
 	tcod.sys_set_fps(60)
 	tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
@@ -32,23 +50,22 @@ def run ():
 	# tcod.console_clear(0)
 
 
-	w, h = 60, 40
-	world_map = [
-		['grass'] * w,
-	] * h
-
-
 	state.timers = util.Timers()
 	state.is_paused = False
+	state.map = Map(41, 41)
 	entities = []
 
 
 	#enemies
 	map_sides = [
-		lambda: (randint(1, 50), 1), #top
-		lambda: (randint(1, 50), 30), #bottom
-		lambda: (1, randint(1, 30)), #left
-		lambda: (50, randint(1, 30)), #right
+		#top
+		lambda: (randint(0, state.map.w - 1), 0),
+		#bottom
+		lambda: (randint(0, state.map.w - 1), state.map.h - 1),
+		#left
+		lambda: (0, randint(0, state.map.h - 1)),
+		#right				
+		lambda: (state.map.w - 1, randint(0, state.map.h - 1)),			
 	]
 	def spawn_enemy ():
 		x, y = random.choice(map_sides)()
@@ -102,13 +119,18 @@ def run ():
 			missile_speed = 20
 			state.timers.start(missile_speed, update_missile)
 
-	te = Tower(state, 20, 20, '@', tcod.dark_green)
-	entities.append(te)
+	heart = util.Entity(state, state.map.w // 2, state.map.h // 2, 'O', tcod.darker_red)
+	entities.append(heart)
+
+	entities.append(Tower(state, heart.x - 1, heart.y, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x + 1, heart.y, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x, heart.y - 1, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x, heart.y + 1, '@', tcod.dark_green))
 
 
 	#panel
 	pan_w = 50
-	pan_h = 10
+	pan_h = 6
 	panel = tcod.console_new(pan_w, pan_h)
 	tcod.console_set_default_foreground(panel, tcod.white)
 
@@ -142,11 +164,7 @@ def run ():
 			e.update()
 
 		#render
-		for y, row in enumerate(world_map):
-			for x, tile_type in enumerate(row):
-				tcod.console_put_char(0, x + 1, y + 1, tile_types[tile_type]['sym'], tcod.BKGND_NONE)
-				tcod.console_set_char_foreground(0, x + 1, y + 1, tile_types[tile_type]['color'])
-				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
+		state.map.render()
 
 		for e in entities:
 			e.render()
@@ -158,7 +176,7 @@ def run ():
 
 		tcod.console_print_ex(panel, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
 		# tcod.console_print_ex(panel, 0, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
-		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 40)
+		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
 
 
 		tcod.console_flush()
