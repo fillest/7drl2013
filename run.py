@@ -9,7 +9,6 @@ else:
 # sys.path.append("tcod-1.5.2/python") 
 sys.path.append("python") 
 import libtcodpy as tcod
-libtcod = tcod
 import random
 from random import randint
 import util
@@ -193,12 +192,12 @@ def run ():
 			e.render()
 
 		if state.is_paused:
-			tcod.console_print_ex(0, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "paused")
+			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "paused")
 		else:
-			tcod.console_print_ex(0, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, " " * 10)
+			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, " " * 10)
 
-		tcod.console_print_ex(panel, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
-		# tcod.console_print_ex(panel, 0, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
+		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
+		# tcod.console_print_ex(panel, 0, 1, tcod.BKGND_NONE, tcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
 		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
 
 
