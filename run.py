@@ -78,7 +78,7 @@ def run ():
 		def __init__(self, *args):
 			super(Tower, self).__init__(*args)
 			self.cooldown = False
-			self.radius = 5
+			self.radius = 5 + 1
 
 		def update (self):
 			if not self.cooldown:
@@ -99,7 +99,7 @@ def run ():
 			for x in range(self.x - self.radius, self.x + self.radius):
 				for y in range(self.y - self.radius, self.y + self.radius):
 					if util.dist(self.x, self.y, x, y) < self.radius:
-						tcod.console_set_char_background(0, x, y, tcod.gray, flag = tcod.BKGND_SET) 
+						tcod.console_set_char_background(0, x, y, tcod.darker_gray, flag = tcod.BKGND_SET) 
 
 		def _shoot (self, e):
 			self.cooldown = True
@@ -132,9 +132,9 @@ def run ():
 	state.heart = heart
 
 	entities.append(Tower(state, heart.x - 1, heart.y, '@', tcod.dark_green))
-	# entities.append(Tower(state, heart.x + 1, heart.y, '@', tcod.dark_green))
-	# entities.append(Tower(state, heart.x, heart.y - 1, '@', tcod.dark_green))
-	# entities.append(Tower(state, heart.x, heart.y + 1, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x + 1, heart.y, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x, heart.y - 1, '@', tcod.dark_green))
+	entities.append(Tower(state, heart.x, heart.y + 1, '@', tcod.dark_green))
 
 
 	#panel
