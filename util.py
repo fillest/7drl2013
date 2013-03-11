@@ -57,5 +57,14 @@ class Enemy (Entity):
 		self.state.timers.start(500, self._move)
 
 	def _move (self):
-		self.x = clamp(self.x + random.randint(-1, 1), 0, self.state.map.w - 1)
-		self.y = clamp(self.y + random.randint(-1, 1), 0, self.state.map.h - 1)
+		# self.x = clamp(self.x + random.randint(-1, 1), 0, self.state.map.w - 1)
+		# self.y = clamp(self.y + random.randint(-1, 1), 0, self.state.map.h - 1)
+
+		tcod.line_init(self.x, self.y, self.state.heart.x, self.state.heart.y)
+		x, y = tcod.line_step()
+		if x is None:
+			pass
+		else:
+			#TODO check x y for obstacle
+			self.x = x
+			self.y = y

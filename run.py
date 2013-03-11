@@ -121,6 +121,7 @@ def run ():
 
 	heart = util.Entity(state, state.map.w // 2, state.map.h // 2, 'O', tcod.darker_red)
 	entities.append(heart)
+	state.heart = heart
 
 	entities.append(Tower(state, heart.x - 1, heart.y, '@', tcod.dark_green))
 	entities.append(Tower(state, heart.x + 1, heart.y, '@', tcod.dark_green))
@@ -152,6 +153,8 @@ def run ():
 
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
+
+			entities.append(Tower(state, mouse.cx, mouse.cy, '@', tcod.dark_green))
 
 
 		#update
