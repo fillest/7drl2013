@@ -15,6 +15,10 @@ import util
 import math
 
 
+FPS_LIMIT = 60
+WINDOW_TITLE = "TD RL"
+
+
 tile_types = dict(
 	grass = dict(
 		sym = '.',
@@ -27,8 +31,8 @@ class state (object):
 
 class Map (object):
 	def __init__ (self, w, h):
-		assert w % 2 == 1
-		assert h % 2 == 1
+		assert w % 2 == 1, "heart is in the center of map"
+		assert h % 2 == 1, "heart is in the center of map"
 		self.w = w
 		self.h = h
 
@@ -44,9 +48,10 @@ class Map (object):
 				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
 def run ():
-	tcod.sys_set_fps(60)
+	os.putenv('SDL_VIDEO_CENTERED', '1')
+	tcod.sys_set_fps(FPS_LIMIT)
 	tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
-	tcod.console_init_root(80, 50, 'TD RL', False)
+	tcod.console_init_root(60, 50, WINDOW_TITLE, False)
 
 	# c1 = tcod.Color(255, 255, 255)
 	# tcod.console_set_default_background(0, c1)
@@ -56,7 +61,7 @@ def run ():
 	state.timers = util.Timers()
 	state.is_paused = False
 	state.map = Map(41, 41)
-	entities = []
+	state.entities = entities = []
 
 
 	#enemies
@@ -70,75 +75,30 @@ def run ():
 		#right				
 		lambda: (state.map.w - 1, randint(0, state.map.h - 1)),			
 	]
+	state.enemy_i = 0
 	def spawn_enemy ():
 		x, y = random.choice(map_sides)()
-		entities.append(util.Enemy(state, x, y, 'r'))
+		entities.append(util.Rat(state, x, y))
+		
+		if state.enemy_i > 4:
+			x, y = random.choice(map_sides)()
+			entities.append(util.Wolf(state, x, y))
+
+			state.enemy_i += 1
+		
+		state.enemy_i += 1
 	state.timers.start(500, spawn_enemy)
 
 
 	#towers
-	class Tower (util.Entity):
-		def __init__(self, *args):
-			super(Tower, self).__init__(*args)
-			self.cooldown = False
-			self.radius = 5 + 1
-
-		def update (self):
-			if not self.cooldown:
-				dist_min = 9000
-				target = None
-				for e in entities:
-					if isinstance(e, util.Enemy):
-						dist = util.dist(self.x, self.y, e.x, e.y)
-						if dist < dist_min:
-							dist_min = dist
-							target = e
-				
-				if target:
-					self._shoot(target)
-
-		def render (self):
-			super(Tower, self).render()
-			if self.mouse_over:
-				for x in range(self.x - self.radius, self.x + self.radius):
-					for y in range(self.y - self.radius, self.y + self.radius):
-						if util.dist(self.x, self.y, x, y) < self.radius:
-							tcod.console_set_char_background(0, x, y, tcod.Color(30, 30, 30), flag = tcod.BKGND_SET) 
-
-		def _shoot (self, e):
-			self.cooldown = True
-			def clear_cd ():
-				self.cooldown = False
-				return True
-			state.timers.start(1000, clear_cd)
-
-			m = util.Entity(state, self.x, self.y, '*', tcod.yellow)
-			entities.append(m)
-
-			def update_missile ():
-				tcod.line_init(m.x, m.y, e.x, e.y)
-				x, y = tcod.line_step()
-				if x is None:
-					entities.remove(m)
-
-					if e in entities:
-						entities.remove(e)
-					
-					return True
-				else:
-					m.x = x
-					m.y = y
-			missile_speed = 20
-			state.timers.start(missile_speed, update_missile)
-
-	heart = util.Entity(state, state.map.w // 2, state.map.h // 2, 'O', tcod.darker_red)
+	heart = util.Heart(state, state.map.w // 2, state.map.h // 2)
 	entities.append(heart)
 	state.heart = heart
 
-	entities.append(Tower(state, heart.x - 1, heart.y, '@', tcod.dark_green))
-	entities.append(Tower(state, heart.x + 1, heart.y, '@', tcod.dark_green))
-	entities.append(Tower(state, heart.x, heart.y - 1, '@', tcod.dark_green))
-	entities.append(Tower(state, heart.x, heart.y + 1, '@', tcod.dark_green))
+	entities.append(util.Tower(state, heart.x - 1, heart.y))
+	entities.append(util.Tower(state, heart.x + 1, heart.y))
+	entities.append(util.Tower(state, heart.x, heart.y - 1))
+	entities.append(util.Tower(state, heart.x, heart.y + 1))
 
 
 	#panel
@@ -166,7 +126,7 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-			entities.append(Tower(state, mouse.cx, mouse.cy, '@', tcod.dark_green))
+			entities.append(util.Tower(state, mouse.cx, mouse.cy))
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
@@ -184,7 +144,7 @@ def run ():
 			e.update()
 
 		#render
-		tcod.console_clear(0)  #TODO dont use
+		tcod.console_clear(0)  #TODO dont use?
 
 		state.map.render()
 
@@ -194,9 +154,10 @@ def run ():
 		if state.is_paused:
 			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "paused")
 		else:
-			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, " " * 10)
+			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, " " * len("paused"))
 
 		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
+		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Advisor: Eew! Rats.. I have musophobia, I told you.")
 		# tcod.console_print_ex(panel, 0, 1, tcod.BKGND_NONE, tcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
 		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
 
