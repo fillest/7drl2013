@@ -96,10 +96,11 @@ def run ():
 
 		def render (self):
 			super(Tower, self).render()
-			for x in range(self.x - self.radius, self.x + self.radius):
-				for y in range(self.y - self.radius, self.y + self.radius):
-					if util.dist(self.x, self.y, x, y) < self.radius:
-						tcod.console_set_char_background(0, x, y, tcod.darker_gray, flag = tcod.BKGND_SET) 
+			if self.mouse_over:
+				for x in range(self.x - self.radius, self.x + self.radius):
+					for y in range(self.y - self.radius, self.y + self.radius):
+						if util.dist(self.x, self.y, x, y) < self.radius:
+							tcod.console_set_char_background(0, x, y, tcod.Color(30, 30, 30), flag = tcod.BKGND_SET) 
 
 		def _shoot (self, e):
 			self.cooldown = True
@@ -164,6 +165,11 @@ def run ():
 
 			entities.append(Tower(state, mouse.cx, mouse.cy, '@', tcod.dark_green))
 
+		for e in entities:
+			if e.x == mouse.cx and e.y == mouse.cy:
+				e.mouse_over = True
+			else:
+				e.mouse_over = False
 
 		#update
 		if not state.is_paused:
@@ -175,6 +181,8 @@ def run ():
 			e.update()
 
 		#render
+		tcod.console_clear(0)  #TODO dont use
+
 		state.map.render()
 
 		for e in entities:

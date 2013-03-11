@@ -43,6 +43,7 @@ class Entity (object):
 		self.sym = sym
 		self.state = state
 		self.color = color
+		self.mouse_over = False
 
 	def render (self):
 		tcod.console_put_char(0, self.x, self.y, self.sym, tcod.BKGND_NONE)
