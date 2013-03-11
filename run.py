@@ -1,7 +1,11 @@
 #coding: utf-8
 import sys
 import os
-os.chdir("libtcod-1.5.2")
+import platform
+if '32' in platform.architecture()[0]:
+	os.chdir("libtcod32-1.5.2")
+else:
+	os.chdir("libtcod-1.5.2")
 # sys.path.append("tcod-1.5.2/python") 
 sys.path.append("python") 
 import libtcodpy as tcod
