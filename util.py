@@ -128,6 +128,9 @@ class Heart (Entity):
 	def __init__ (self, *args):
 		super(Heart, self).__init__(*args)
 		self.hp = self.max_hp
+		
+	def die (self):
+		self.state.entities.remove(self)
 
 class Tower (Entity):
 	sym = '@'
