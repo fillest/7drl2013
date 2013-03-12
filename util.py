@@ -48,19 +48,18 @@ class EnemyGroup (object):
 		
 		for _ in range(rows * cols):
 			self.enemies.append(random.choice([Wolf, Rat]))
+			
+		self.spawn()
 		
 	def spawn (self):
-		l = []
 		y = self.start_y
 		
 		for c in range(self.cols):
 			x = self.start_x
 			for r in range(self.rows):
-				l.append(self.enemies[c + r](self.state, x, y))
+				self.state.entities.append(self.enemies[c + r](self.state, x, y))
 				x += 1
 			y += 1
-
-		return l
 		
 class Entity (object):
 	color = tcod.white

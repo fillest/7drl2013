@@ -87,10 +87,7 @@ def run ():
 			x, y = random.choice(map_sides)()
 			rows = random.randint(1, 4)
 			cols = random.randint(1, 4)
-			enemy_group = util.EnemyGroup(state, x, y, rows, cols)
-			enemies_in_group = enemy_group.spawn()
-			for e in enemies_in_group:
-				entities.append(e)
+			util.EnemyGroup(state, x, y, rows, cols)
 		
 		# x, y = random.choice(map_sides)()
 		x, y = random.choice([(5,5), (6,5)])
