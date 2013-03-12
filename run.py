@@ -47,6 +47,12 @@ class Map (object):
 				tcod.console_set_char_foreground(0, x, y, tile_types[tile_type]['color'])
 				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
+class Entities (list):
+	def enemies (self):
+		for e in self:
+			if isinstance(e, util.Enemy):
+				yield e
+
 def run ():
 	os.putenv('SDL_VIDEO_CENTERED', '1')
 	tcod.sys_set_fps(FPS_LIMIT)
@@ -61,7 +67,7 @@ def run ():
 	state.timers = util.Timers()
 	state.is_paused = False
 	state.map = Map(41, 41)
-	state.entities = entities = []
+	state.entities = entities = Entities()
 
 
 	#enemies
@@ -77,7 +83,8 @@ def run ():
 	]
 	state.enemy_i = 0
 	def spawn_enemy ():
-		x, y = random.choice(map_sides)()
+		# x, y = random.choice(map_sides)()
+		x, y = random.choice([(5,5), (6,5)])
 		entities.append(util.Rat(state, x, y))
 		
 		if state.enemy_i > 4:
@@ -95,10 +102,10 @@ def run ():
 	entities.append(heart)
 	state.heart = heart
 
-	entities.append(util.Tower(state, heart.x - 1, heart.y))
-	entities.append(util.Tower(state, heart.x + 1, heart.y))
-	entities.append(util.Tower(state, heart.x, heart.y - 1))
-	entities.append(util.Tower(state, heart.x, heart.y + 1))
+	entities.append(util.BasicTower(state, heart.x - 1, heart.y))
+	entities.append(util.BasicTower(state, heart.x + 1, heart.y))
+	entities.append(util.BasicTower(state, heart.x, heart.y - 1))
+	entities.append(util.AoeTower(state, heart.x, heart.y + 1))
 
 
 	#panel

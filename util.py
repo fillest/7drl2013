@@ -57,6 +57,20 @@ class BasicMissile (Entity):
 	sym = '*'
 	color = tcod.yellow
 
+class AoeExplosion (Entity):
+	sym = '*'
+	color = tcod.dark_red
+
+	def __init__(self, radius, *args):
+		super(AoeExplosion, self).__init__(*args)
+		self.radius = radius
+
+	def render (self):
+		for x in range(self.x - self.radius, self.x + self.radius):
+			for y in range(self.y - self.radius, self.y + self.radius):
+				tcod.console_put_char(0, x, y, self.sym, tcod.BKGND_NONE)
+				tcod.console_set_char_foreground(0, x, y, self.color)
+
 class Enemy (Entity):
 	max_hp = 1
 
@@ -96,12 +110,12 @@ class Heart (Entity):
 
 class Tower (Entity):
 	sym = '@'
-	color = tcod.dark_green
+	radius = 10
+	damage = 1
 
 	def __init__(self, *args):
 		super(Tower, self).__init__(*args)
 		self.cooldown = False
-		self.radius = 10 + 1
 
 	def update (self):
 		if not self.cooldown:
@@ -110,7 +124,7 @@ class Tower (Entity):
 			for e in self.state.entities:
 				if isinstance(e, Enemy):
 					d = dist(self.x, self.y, e.x, e.y)
-					if d < self.radius and d < dist_min:
+					if d < (self.radius + 1) and d < dist_min:
 						dist_min = d
 						target = e
 			
@@ -121,9 +135,9 @@ class Tower (Entity):
 		super(Tower, self).render()
 		# if self.mouse_over:
 		if True:
-			for x in range(self.x - self.radius, self.x + self.radius):
-				for y in range(self.y - self.radius, self.y + self.radius):
-					if dist(self.x, self.y, x, y) < self.radius:
+			for x in range(self.x - (self.radius + 1), self.x + (self.radius + 1)):
+				for y in range(self.y - (self.radius + 1), self.y + (self.radius + 1)):
+					if dist(self.x, self.y, x, y) < (self.radius + 1):
 						tcod.console_set_char_background(0, x, y, tcod.Color(*[15]*3), flag = tcod.BKGND_SET) 
 
 	def _shoot (self, e):
@@ -144,13 +158,37 @@ class Tower (Entity):
 		x, y = tcod.line_step()
 		if x is None:
 			self.state.entities.remove(m)
-
-			if e in self.state.entities:
-				e.hp -= 1
-				if e.hp < 1:
-					self.state.entities.remove(e)
 			
+			self.hit(e)
+
 			return True
 		else:
 			m.x = x
 			m.y = y
+
+	def hit (self, e):
+		if e in self.state.entities:
+			e.hp -= self.damage
+			if e.hp < 1:
+				self.state.entities.remove(e)
+
+class BasicTower (Tower):
+	color = tcod.dark_green
+
+class AoeTower (Tower):
+	color = tcod.dark_orange
+
+	def hit (self, target):
+		radius = 2
+		for x in range(target.x - radius, target.x + radius):
+			for y in range(target.y - radius, target.y + radius):
+				for e in self.state.entities.enemies():
+					if (e.x, e.y) == (x, y):
+						if e in self.state.entities: #TODO copypaste
+							e.hp -= self.damage 
+							if e.hp < 1: 
+								self.state.entities.remove(e)
+
+		e = AoeExplosion(radius, self.state, target.x, target.y)
+		self.state.entities.append(e)
+		self.state.timers.start(70, lambda: self.state.entities.remove(e) or True)
