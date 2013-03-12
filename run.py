@@ -13,6 +13,8 @@ import random
 from random import randint
 import util
 import math
+import towers
+import enemies
 
 
 FPS_LIMIT = 60
@@ -78,13 +80,13 @@ def run ():
 	state.enemy_i = 0
 	
 	def spawn_enemy_group (start_x, start_y, rows, cols):
-		enemies = [random.choice([util.Wolf, util.Rat]) for _ in range(rows * cols)]
+		es = [random.choice([enemies.Wolf, enemies.Rat]) for _ in range(rows * cols)]
 		
 		y = start_y
 		for c in range(cols):
 			x = start_x
 			for r in range(rows):
-				entities.append(enemies[c + r](state, x, y))
+				entities.append(es[c + r](state, x, y))
 				x += 1
 			y += 1
 	
@@ -97,11 +99,11 @@ def run ():
 		
 		# x, y = random.choice(map_sides)()
 		x, y = random.choice([(5,5), (6,5)])
-		entities.append(util.Rat(state, x, y))
+		entities.append(enemies.Rat(state, x, y))
 		
 		if state.enemy_i > 4:
 			x, y = random.choice(map_sides)()
-			entities.append(util.Wolf(state, x, y))
+			entities.append(enemies.Wolf(state, x, y))
 
 			state.enemy_i += 1
 		
@@ -110,14 +112,14 @@ def run ():
 
 
 	#towers
-	heart = util.Heart(state, state.map.w // 2, state.map.h // 2)
+	heart = towers.Heart(state, state.map.w // 2, state.map.h // 2)
 	entities.append(heart)
 	state.heart = heart
 
-	entities.append(util.BasicTower(state, heart.x - 1, heart.y))
-	entities.append(util.BasicTower(state, heart.x + 1, heart.y))
-	entities.append(util.BasicTower(state, heart.x, heart.y - 1))
-	entities.append(util.AoeTower(state, heart.x, heart.y + 1))
+	entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
+	entities.append(towers.BasicTower(state, heart.x + 1, heart.y))
+	entities.append(towers.BasicTower(state, heart.x, heart.y - 1))
+	entities.append(towers.AoeTower(state, heart.x, heart.y + 1))
 
 
 	#panel
@@ -148,7 +150,7 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-			entities.append(util.Tower(state, mouse.cx, mouse.cy))
+			entities.append(towers.BasicTower(state, mouse.cx, mouse.cy))
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
@@ -160,8 +162,9 @@ def run ():
 		if not state.is_paused:
 			state.timers.update()
 
-		for e in entities:
-			e.update()
+		if not state.is_paused:
+			for e in entities:
+				e.update()
 
 		#render
 		tcod.console_clear(0)  #TODO dont use?
