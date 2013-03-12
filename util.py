@@ -73,10 +73,11 @@ class AoeExplosion (Entity):
 
 class Enemy (Entity):
 	max_hp = 1
+	speed = 1
 
 	def __init__(self, *args):
 		super(Enemy, self).__init__(*args)
-		self.state.timers.start(500, self._move)
+		self.state.timers.start(500 / self.speed, self._move)
 		self.hp = self.max_hp
 
 	def _move (self):
@@ -103,6 +104,7 @@ class Wolf (Enemy):
 	sym = 'w'
 	color = tcod.lighter_grey
 	max_hp = 2
+	speed = 2
 
 class Heart (Entity):
 	sym = '&'
