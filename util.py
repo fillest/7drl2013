@@ -146,8 +146,7 @@ class Tower (Entity):
 						target = e
 			
 			if target:
-				pass
-				#self._shoot(target)
+				self._shoot(target)
 
 	def render (self):
 		super(Tower, self).render()
