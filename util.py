@@ -34,7 +34,9 @@ class Timer (object):
 
 class Timers (list):
 	def start (self, interval, cb, args = None):
-		self.append(Timer(interval, cb, args).start())
+		timer = Timer(interval, cb, args)
+		self.append(timer.start())
+		return timer
 
 class EnemyGroup (object):
 	def __init__ (self, state, x, y, rows, cols):
@@ -103,7 +105,7 @@ class Enemy (Entity):
 
 	def __init__(self, *args):
 		super(Enemy, self).__init__(*args)
-		self.state.timers.start(500 / self.speed, self._move)
+		self.timer = self.state.timers.start(500 / self.speed, self._move)
 		self.hp = self.max_hp
 
 	def _move (self):
@@ -127,8 +129,12 @@ class Enemy (Entity):
 		if e in self.state.entities:
 			e.hp -= self.damage
 			if e.hp < 1:
-				self.state.entities.remove(e)
-
+				e.die()
+				
+	def die (self):
+		self.state.entities.remove(self)
+		self.state.timers.remove(self.timer)
+		
 class Rat (Enemy):
 	sym = 'r'
 	color = tcod.lighter_sepia
@@ -212,7 +218,10 @@ class Tower (Entity):
 		if e in self.state.entities:
 			e.hp -= self.damage
 			if e.hp < 1:
-				self.state.entities.remove(e)
+				e.die()
+				
+	def die (self):
+		self.state.entities.remove(self)
 
 class BasicTower (Tower):
 	color = tcod.dark_green
