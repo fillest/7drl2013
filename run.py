@@ -82,12 +82,24 @@ def run ():
 		lambda: (state.map.w - 1, randint(0, state.map.h - 1)),			
 	]
 	state.enemy_i = 0
+	
+	def spawn_enemy_group (start_x, start_y, rows, cols):
+		enemies = [random.choice([util.Wolf, util.Rat]) for _ in range(rows * cols)]
+		
+		y = start_y
+		for c in range(cols):
+			x = start_x
+			for r in range(rows):
+				entities.append(enemies[c + r](state, x, y))
+				x += 1
+			y += 1
+	
 	def spawn_enemy ():
 		if random.random() >= 0.8:
 			x, y = random.choice(map_sides)()
 			rows = random.randint(1, 4)
 			cols = random.randint(1, 4)
-			util.EnemyGroup(state, x, y, rows, cols)
+			spawn_enemy_group(x, y, rows, cols)
 		
 		# x, y = random.choice(map_sides)()
 		x, y = random.choice([(5,5), (6,5)])

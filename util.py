@@ -37,31 +37,6 @@ class Timers (list):
 		timer = Timer(interval, cb, args)
 		self.append(timer.start())
 		return timer
-
-class EnemyGroup (object):
-	def __init__ (self, state, x, y, rows, cols):
-		self.state = state
-		self.start_x = x
-		self.start_y = y
-		self.rows = rows
-		self.cols = cols
-		
-		self.enemies = []
-		
-		for _ in range(rows * cols):
-			self.enemies.append(random.choice([Wolf, Rat]))
-			
-		self.spawn()
-		
-	def spawn (self):
-		y = self.start_y
-		
-		for c in range(self.cols):
-			x = self.start_x
-			for r in range(self.rows):
-				self.state.entities.append(self.enemies[c + r](self.state, x, y))
-				x += 1
-			y += 1
 		
 class Entity (object):
 	color = tcod.white
