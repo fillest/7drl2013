@@ -15,6 +15,7 @@ class Timer (object):
 		self.interval = interval
 		self.last_time = None
 		self.args = args if args else ()
+		self.time_buf = 0
 
 	def start (self):
 		self.last_time = tcod.sys_elapsed_milli()
@@ -22,22 +23,45 @@ class Timer (object):
 
 	def update (self):
 		cur_time = tcod.sys_elapsed_milli()
-		#TODO buffering + dont forget pause
-		#
-		# last_time = cur_time
-		#
-		if cur_time - self.last_time >= self.interval:
+		dt = cur_time - self.last_time
+		self.last_time = cur_time
+		self.time_buf += dt
+
+		while self.time_buf >= self.interval:
+			self.time_buf -= self.interval
+
 			result = self.cb(*self.args)
 			if result:
 				return result
-			self.last_time = cur_time
+
+	def pause (self):
+		cur_time = tcod.sys_elapsed_milli() #TODO paste
+		dt = cur_time - self.last_time
+		self.last_time = cur_time
+		self.time_buf += dt
+
+	def resume (self):
+		self.last_time = tcod.sys_elapsed_milli()
 
 class Timers (list):
 	def start (self, interval, cb, args = None):
 		timer = Timer(interval, cb, args)
 		self.append(timer.start())
 		return timer
-		
+	
+	def update (self):
+		for t in list(self):
+			if t.update():
+				self.remove(t)
+
+	def pause (self):
+		for t in self:
+			t.pause()
+
+	def resume (self):
+		for t in self:
+			t.resume()
+
 class Entity (object):
 	color = tcod.white
 	sym = None
@@ -55,6 +79,12 @@ class Entity (object):
 	def update (self):
 		pass
 
+class Entities (list):
+	def enemies (self):
+		for e in self:
+			if isinstance(e, Enemy):
+				yield e
+
 class BasicMissile (Entity):
 	sym = '*'
 	color = tcod.yellow
@@ -63,7 +93,7 @@ class AoeExplosion (Entity):
 	sym = '*'
 	color = tcod.dark_red
 
-	def __init__(self, radius, *args):
+	def __init__ (self, radius, *args):
 		super(AoeExplosion, self).__init__(*args)
 		self.radius = radius
 
@@ -78,7 +108,7 @@ class Enemy (Entity):
 	speed = 1
 	damage = 1
 
-	def __init__(self, *args):
+	def __init__ (self, *args):
 		super(Enemy, self).__init__(*args)
 		self.timer = self.state.timers.start(500 / self.speed, self._move)
 		self.hp = self.max_hp

@@ -47,12 +47,6 @@ class Map (object):
 				tcod.console_set_char_foreground(0, x, y, tile_types[tile_type]['color'])
 				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
-class Entities (list):
-	def enemies (self):
-		for e in self:
-			if isinstance(e, util.Enemy):
-				yield e
-
 def run ():
 	os.putenv('SDL_VIDEO_CENTERED', '1')
 	tcod.sys_set_fps(FPS_LIMIT)
@@ -67,7 +61,7 @@ def run ():
 	state.timers = util.Timers()
 	state.is_paused = False
 	state.map = Map(41, 41)
-	state.entities = entities = Entities()
+	state.entities = entities = util.Entities()
 
 
 	#enemies
@@ -145,8 +139,11 @@ def run ():
 		if key.vk == tcod.KEY_ESCAPE:
 			break
 		elif key.vk == tcod.KEY_SPACE:
+			if state.is_paused:
+				state.timers.resume()
+			else:
+				state.timers.pause()
 			state.is_paused = not state.is_paused
-			#TODO after log pause shoots two times -- its now remade but seems timer+pause is buggy
 
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
@@ -161,9 +158,7 @@ def run ():
 
 		#update
 		if not state.is_paused:
-			for t in list(state.timers):
-				if t.update():
-					state.timers.remove(t)
+			state.timers.update()
 
 		for e in entities:
 			e.update()
