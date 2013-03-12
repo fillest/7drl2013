@@ -74,6 +74,7 @@ class AoeExplosion (Entity):
 class Enemy (Entity):
 	max_hp = 1
 	speed = 1
+	damage = 1
 
 	def __init__(self, *args):
 		super(Enemy, self).__init__(*args)
@@ -91,10 +92,17 @@ class Enemy (Entity):
 		else:
 			for e in self.state.entities:
 				if e.x == x and e.y == y and isinstance(e, (Tower, Heart)):
-					return
+					self.hit(e)
 			
 			self.x = x
 			self.y = y
+			
+	def hit (self, e):
+		print 'Enemy {0} hit the {1}. Damage: {2}'.format(self.__class__.__name__, e.__class__.__name__, self.damage)
+		if e in self.state.entities:
+			e.hp -= self.damage
+			if e.hp < 1:
+				self.state.entities.remove(e)
 
 class Rat (Enemy):
 	sym = 'r'
@@ -109,15 +117,22 @@ class Wolf (Enemy):
 class Heart (Entity):
 	sym = '&'
 	color = tcod.darker_red
+	max_hp = 10
+	
+	def __init__ (self, *args):
+		super(Heart, self).__init__(*args)
+		self.hp = self.max_hp
 
 class Tower (Entity):
 	sym = '@'
 	radius = 10
+	max_hp = 10
 	damage = 1
 
-	def __init__(self, *args):
+	def __init__ (self, *args):
 		super(Tower, self).__init__(*args)
 		self.cooldown = False
+		self.hp = self.max_hp
 
 	def update (self):
 		if not self.cooldown:
@@ -131,7 +146,8 @@ class Tower (Entity):
 						target = e
 			
 			if target:
-				self._shoot(target)
+				pass
+				#self._shoot(target)
 
 	def render (self):
 		super(Tower, self).render()
