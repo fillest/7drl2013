@@ -100,12 +100,15 @@ class Enemy (Entity):
 			self.y = y
 			
 	def hit (self, e):
-		print 'Enemy {0} hit the {1}. Damage: {2}'.format(self.__class__.__name__, e.__class__.__name__, self.damage)
 		if e in self.state.entities:
-			e.hp -= self.damage
-			if e.hp < 1:
-				e.die()
-				
+			print 'Enemy {0} hit the {1}. Damage: {2}'.format(self.__class__.__name__, e.__class__.__name__, self.damage)
+			e.hurt(self.damage)
+	
+	def hurt (self, hp):
+		self.hp -= hp
+		if self.hp < 1:
+			self.die()
+	
 	def die (self):
 		self.state.entities.remove(self)
 		self.state.timers.remove(self.timer)
@@ -128,7 +131,12 @@ class Heart (Entity):
 	def __init__ (self, *args):
 		super(Heart, self).__init__(*args)
 		self.hp = self.max_hp
-		
+	
+	def hurt (self, hp):
+		self.hp -= hp
+		if self.hp < 1:
+			self.die()
+	
 	def die (self):
 		self.state.entities.remove(self)
 
@@ -194,10 +202,13 @@ class Tower (Entity):
 
 	def hit (self, e):
 		if e in self.state.entities:
-			e.hp -= self.damage
-			if e.hp < 1:
-				e.die()
-				
+			e.hurt(self.damage)
+	
+	def hurt (self, hp):
+		self.hp -= hp
+		if self.hp < 1:
+			self.die()
+		
 	def die (self):
 		self.state.entities.remove(self)
 
@@ -214,9 +225,7 @@ class AoeTower (Tower):
 				for e in self.state.entities.enemies():
 					if (e.x, e.y) == (x, y):
 						if e in self.state.entities: #TODO copypaste
-							e.hp -= self.damage 
-							if e.hp < 1: 
-								self.state.entities.remove(e)
+							e.hurt(self.damage)
 
 		e = AoeExplosion(radius, self.state, target.x, target.y)
 		self.state.entities.append(e)
