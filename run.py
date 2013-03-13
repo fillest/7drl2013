@@ -181,7 +181,7 @@ def run ():
 			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, " " * len("paused"))
 
 		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
-		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Advisor: Eew! Rats.. I have musophobia, I told you.")
+		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Adviser: Eew! Rats.. I have musophobia, I told you.")
 		# tcod.console_print_ex(panel, 0, 1, tcod.BKGND_NONE, tcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
 		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
 

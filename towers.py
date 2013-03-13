@@ -47,12 +47,12 @@ class Tower (util.Entity):
 
 	def update (self):
 		if not self.cooldown:
-			dist_min = 9000
+			dist_min = None
 			target = None
 			for e in self.state.entities:
 				if isinstance(e, enemies.Enemy):
 					d = util.dist(self.x, self.y, e.x, e.y)
-					if d < (self.radius + 1) and d < dist_min:
+					if d < (self.radius + 1) and ((dist_min is None) or (d < dist_min)):
 						dist_min = d
 						target = e
 			
@@ -72,8 +72,7 @@ class Tower (util.Entity):
 		self.cooldown = True
 		def clear_cd ():
 			self.cooldown = False
-			return True
-		self.state.timers.start(1000, clear_cd)
+		self.state.timers.start_run_once(1000, clear_cd)
 
 		m = self.missile(self.state, self.x, self.y)
 		self.state.entities.append(m)
@@ -89,7 +88,7 @@ class Tower (util.Entity):
 			
 			self.hit(e)
 
-			return True
+			return util.STOP
 		else:
 			m.x = x
 			m.y = y
@@ -139,7 +138,7 @@ class AoeTower (Tower):
 
 		e = AoeExplosion(radius, self.state, target.x, target.y)
 		self.state.entities.append(e)
-		self.state.timers.start(70, lambda: self.state.entities.remove(e) or True)
+		self.state.timers.start_run_once(70, lambda: self.state.entities.remove(e))
 
 class IceTower (Tower):
 	damage = 0.2
@@ -158,7 +157,6 @@ class IceTower (Tower):
 				target.timer.interval = old_speed
 				target.timer.time_buf /= 3
 				target.is_debuffed = False
-				return True
-			self.rollback_timer = self.state.timers.start(1000, rollback)
+			self.rollback_timer = self.state.timers.start_run_once(1000, rollback)
 		else:
 			self.rollback_timer.reset()

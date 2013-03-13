@@ -30,6 +30,9 @@ def clamp (value, min_value, max_value):
 def dist (x1, y1, x2, y2):
 	return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
+
+STOP = True
+
 class Timer (object):
 	def __init__ (self, interval, cb, args = None):
 		self.cb = cb
@@ -73,6 +76,12 @@ class Timers (list):
 		timer = Timer(interval, cb, args)
 		self.append(timer.start())
 		return timer
+
+	def start_run_once (self, interval, cb, args = None):
+		def run_once (*args):
+			res = cb(*args)
+			return res or STOP
+		return self.start(interval, run_once, args)
 	
 	def update (self):
 		for t in list(self):
@@ -86,7 +95,6 @@ class Timers (list):
 	def resume (self):
 		for t in self:
 			t.resume()
-
 
 
 class Entities (list):
