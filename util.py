@@ -64,6 +64,10 @@ class Timer (object):
 	def resume (self):
 		self.last_time = tcod.sys_elapsed_milli()
 
+	def reset (self):
+		self.last_time = tcod.sys_elapsed_milli()
+		self.time_buf = 0
+
 class Timers (list):
 	def start (self, interval, cb, args = None):
 		timer = Timer(interval, cb, args)

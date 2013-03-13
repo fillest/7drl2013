@@ -142,19 +142,23 @@ class AoeTower (Tower):
 		self.state.timers.start(70, lambda: self.state.entities.remove(e) or True)
 
 class IceTower (Tower):
-	damage = 0.5
+	damage = 0.2
 	color = tcod.dark_blue
 	missile = IceMissile
 
 	def hit (self, target):
-		# target.hurt(self.damage)
+		target.hurt(self.damage)
 		
 		if not getattr(target, 'is_debuffed', False):
 			old_speed = target.timer.interval
 			target.timer.interval *= 3
+			target.timer.time_buf *= 3
 			target.is_debuffed = True
 			def rollback ():
 				target.timer.interval = old_speed
+				target.timer.time_buf /= 3
 				target.is_debuffed = False
 				return True
-			self.state.timers.start(2000, rollback)
+			self.rollback_timer = self.state.timers.start(1000, rollback)
+		else:
+			self.rollback_timer.reset()
