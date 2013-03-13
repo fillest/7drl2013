@@ -90,25 +90,26 @@ def run ():
 				x += 1
 			y += 1
 	
-	def spawn_enemy ():
-		if random.random() >= 0.8:
-			x, y = random.choice(map_sides)()
-			rows = random.randint(1, 4)
-			cols = random.randint(1, 4)
-			spawn_enemy_group(x, y, rows, cols)
+	# def spawn_enemy ():
+	# 	if random.random() >= 0.8:
+	# 		x, y = random.choice(map_sides)()
+	# 		rows = random.randint(1, 4)
+	# 		cols = random.randint(1, 4)
+	# 		spawn_enemy_group(x, y, rows, cols)
 		
-		# x, y = random.choice(map_sides)()
-		x, y = random.choice([(5,5), (6,5)])
-		entities.append(enemies.Rat(state, x, y))
+	# 	# x, y = random.choice(map_sides)()
+	# 	x, y = random.choice([(5,5), (6,5)])
+	# 	entities.append(enemies.Rat(state, x, y))
 		
-		if state.enemy_i > 4:
-			x, y = random.choice(map_sides)()
-			entities.append(enemies.Wolf(state, x, y))
+	# 	if state.enemy_i > 4:
+	# 		x, y = random.choice(map_sides)()
+	# 		entities.append(enemies.Wolf(state, x, y))
 
-			state.enemy_i += 1
+	# 		state.enemy_i += 1
 		
-		state.enemy_i += 1
-	state.timers.start(500, spawn_enemy)
+	# 	state.enemy_i += 1
+	# state.timers.start(500, spawn_enemy)
+	entities.append(enemies.Wolf(state, 1, 1))
 
 
 	#towers
@@ -116,10 +117,10 @@ def run ():
 	entities.append(heart)
 	state.heart = heart
 
-	entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
-	entities.append(towers.BasicTower(state, heart.x + 1, heart.y))
-	entities.append(towers.BasicTower(state, heart.x, heart.y - 1))
-	entities.append(towers.AoeTower(state, heart.x, heart.y + 1))
+	# entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
+	# entities.append(towers.BasicTower(state, heart.x + 1, heart.y))
+	entities.append(towers.IceTower(state, heart.x, heart.y - 1))
+	# entities.append(towers.AoeTower(state, heart.x, heart.y + 1))
 
 
 	#panel

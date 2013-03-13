@@ -2,23 +2,18 @@ import util
 import libtcodpy as tcod
 import enemies
 
+
 class BasicMissile (util.Entity):
 	sym = '*'
 	color = tcod.yellow
 
-class AoeExplosion (util.Entity):
+class IceMissile (util.Entity):
 	sym = '*'
-	color = tcod.dark_red
+	color = tcod.light_blue
 
-	def __init__ (self, radius, *args):
-		super(AoeExplosion, self).__init__(*args)
-		self.radius = radius
-
-	def render (self):
-		for x in range(self.x - self.radius, self.x + self.radius):
-			for y in range(self.y - self.radius, self.y + self.radius):
-				tcod.console_put_char(0, x, y, self.sym, tcod.BKGND_NONE)
-				tcod.console_set_char_foreground(0, x, y, self.color)
+class AoeMissile (util.Entity):
+	sym = '*'
+	color = tcod.red
 
 
 class Heart (util.Entity):
@@ -40,9 +35,10 @@ class Heart (util.Entity):
 
 class Tower (util.Entity):
 	sym = '@'
-	radius = 10
+	radius = 15
 	max_hp = 10
 	damage = 1
+	missile = None
 
 	def __init__ (self, *args):
 		super(Tower, self).__init__(*args)
@@ -79,7 +75,7 @@ class Tower (util.Entity):
 			return True
 		self.state.timers.start(1000, clear_cd)
 
-		m = BasicMissile(self.state, self.x, self.y)
+		m = self.missile(self.state, self.x, self.y)
 		self.state.entities.append(m)
 		
 		missile_speed = 20
@@ -112,9 +108,25 @@ class Tower (util.Entity):
 
 class BasicTower (Tower):
 	color = tcod.dark_green
+	missile = BasicMissile
+
+class AoeExplosion (util.Entity):
+	sym = '*'
+	color = tcod.dark_red
+
+	def __init__ (self, radius, *args):
+		super(AoeExplosion, self).__init__(*args)
+		self.radius = radius
+
+	def render (self):
+		for x in range(self.x - self.radius, self.x + self.radius):
+			for y in range(self.y - self.radius, self.y + self.radius):
+				tcod.console_put_char(0, x, y, self.sym, tcod.BKGND_NONE)
+				tcod.console_set_char_foreground(0, x, y, self.color)
 
 class AoeTower (Tower):
 	color = tcod.dark_orange
+	missile = AoeMissile
 
 	def hit (self, target):
 		radius = 2
@@ -128,3 +140,21 @@ class AoeTower (Tower):
 		e = AoeExplosion(radius, self.state, target.x, target.y)
 		self.state.entities.append(e)
 		self.state.timers.start(70, lambda: self.state.entities.remove(e) or True)
+
+class IceTower (Tower):
+	damage = 0.5
+	color = tcod.dark_blue
+	missile = IceMissile
+
+	def hit (self, target):
+		# target.hurt(self.damage)
+		
+		if not getattr(target, 'is_debuffed', False):
+			old_speed = target.timer.interval
+			target.timer.interval *= 3
+			target.is_debuffed = True
+			def rollback ():
+				target.timer.interval = old_speed
+				target.is_debuffed = False
+				return True
+			self.state.timers.start(2000, rollback)
