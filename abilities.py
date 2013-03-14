@@ -14,15 +14,14 @@ class Ability (util.Entity):
 			self.state.entities.remove(self)
 		self.state.timers.start_run_once(self.action_time, rollback)	
 		
-class FakeHeartAbility (Ability):
+class BaitAbility (Ability):
 	action_time = 1000000000
 	
 	def use (self):
-		fake_heart = towers.FakeHeart(self.state, self.x, self.y)
-		self.state.heart = fake_heart
-		self.state.entities.append(fake_heart)
+		bait = towers.Bait(self.state, self.x, self.y)
+		self.state.entities.append(bait)
 		def rollback ():
-			fake_heart.die()
+			bait.die()
 		self.state.timers.start_run_once(self.action_time, rollback)
 			
 	def render (self):

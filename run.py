@@ -64,7 +64,6 @@ def run ():
 	state.is_paused = False
 	state.map = Map(41, 41)
 	state.entities = entities = util.Entities()
-	state.hearts = []
 
 
 	#enemies
@@ -154,7 +153,7 @@ def run ():
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
 			#entities.append(towers.BasicTower(state, mouse.cx, mouse.cy))
-			a = abilities.FakeHeartAbility(None, state, mouse.cx, mouse.cy)
+			a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
 			a.use()
 
 		for e in entities:

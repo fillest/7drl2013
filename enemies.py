@@ -16,9 +16,19 @@ class Enemy (util.Entity):
 	def _move (self):
 		# self.x = clamp(self.x + random.randint(-1, 1), 0, self.state.map.w - 1)
 		# self.y = clamp(self.y + random.randint(-1, 1), 0, self.state.map.h - 1)
-
-		tcod.line_init(self.x, self.y, self.state.heart.x, self.state.heart.y)
+		
+		step_x, step_y = self.state.heart.x, self.state.heart.y
+		baits = [e for e in self.state.entities if isinstance(e, towers.Bait)]
+		if baits:
+			curr_bait = baits[0]
+			for bait in baits:
+				if util.dist(self.x, self.y, curr_bait.x, curr_bait.y) > util.dist(self.x, self.y, bait.x, bait.y):
+					curr_bait = bait
+			step_x, step_y = curr_bait.x, curr_bait.y
+		
+		tcod.line_init(self.x, self.y, step_x, step_y)
 		x, y = tcod.line_step()
+		
 		if x is None:
 			pass
 		else:
