@@ -11,4 +11,4 @@ class Ability (util.Entity):
 		self.state.entities.append(self)
 		def rollback ():
 			self.state.entities.remove(self)
-		self.state.timers.start_run_once(1000, rollback)	
+		self.state.timers.start_run_once(self.action_time, rollback)	
