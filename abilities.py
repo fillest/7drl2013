@@ -19,7 +19,7 @@ class FakeHeartAbility (Ability):
 	
 	def use (self):
 		fake_heart = towers.FakeHeart(self.state, self.x, self.y)
-		self.state.heart = fake_heart # TODO: Fix multiple fake_hearts
+		self.state.heart = fake_heart
 		self.state.entities.append(fake_heart)
 		def rollback ():
 			fake_heart.die()

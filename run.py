@@ -118,7 +118,6 @@ def run ():
 	heart = towers.Heart(state, state.map.w // 2, state.map.h // 2)
 	entities.append(heart)
 	state.heart = heart
-	state.hearts.append(heart)
 
 	# entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
 	# entities.append(towers.BasicTower(state, heart.x + 1, heart.y))

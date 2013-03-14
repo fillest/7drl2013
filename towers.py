@@ -24,6 +24,7 @@ class Heart (util.Entity):
 	def __init__ (self, *args):
 		super(Heart, self).__init__(*args)
 		self.hp = self.max_hp
+		self.state.hearts.append(self)
 	
 	def hurt (self, hp):
 		self.hp -= hp
