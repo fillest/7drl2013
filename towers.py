@@ -31,7 +31,8 @@ class Heart (util.Entity):
 			self.die()
 	
 	def die (self):
-		self.state.entities.remove(self)
+		if self in self.state.entities:
+			self.state.entities.remove(self)
 
 class Tower (util.Entity):
 	sym = '@'
@@ -103,7 +104,8 @@ class Tower (util.Entity):
 			self.die()
 		
 	def die (self):
-		self.state.entities.remove(self)
+		if self in self.state.entities:
+			self.state.entities.remove(self)
 
 class BasicTower (Tower):
 	color = tcod.dark_green
