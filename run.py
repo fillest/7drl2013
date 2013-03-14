@@ -120,7 +120,7 @@ def run ():
 	state.heart = heart
 
 	towers.BasicTower(state, heart.x - 1, heart.y).put()
-	towers.BasicTower(state, heart.x + 1, heart.y).put()
+	towers.ResearchBuilding(state, heart.x + 1, heart.y).put()
 	towers.IceTower(state, heart.x, heart.y - 1).put()
 	towers.AoeTower(state, heart.x, heart.y + 1).put()
 
@@ -159,10 +159,10 @@ def run ():
 
 			e = map_to_entity(mouse.cx, mouse.cy)
 			if not isinstance(e, towers.Building):
-				towers.BasicTower(state, mouse.cx, mouse.cy).put()
+				# towers.ResearchTower(state, mouse.cx, mouse.cy).put()
 
-				# a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
-				# a.use()
+				a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
+				a.use()
 		elif mouse.rbutton_pressed:
 			e = map_to_entity(mouse.cx, mouse.cy)
 			if isinstance(e, towers.Tower):

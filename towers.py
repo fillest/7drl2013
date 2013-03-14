@@ -3,21 +3,24 @@ import libtcodpy as tcod
 import enemies
 
 
-class BasicMissile (util.Entity):
+class Missile (util.Entity):
 	sym = '*'
+	color = tcod.white
+
+class BasicMissile (Missile):
 	color = tcod.yellow
 
-class IceMissile (util.Entity):
-	sym = '*'
+class IceMissile (Missile):
 	color = tcod.light_blue
 
-class AoeMissile (util.Entity):
-	sym = '*'
+class AoeMissile (Missile):
 	color = tcod.red
 
 
 class Building (util.Entity):
+	sym = '@'
 	max_hp = 1
+	cost = 0
 
 	def __init__ (self, *args):
 		super(Building, self).__init__(*args)
@@ -35,30 +38,7 @@ class Building (util.Entity):
 	
 	def die (self):
 		if self in self.state.entities:
-			self.state.entities.remove(self)
-
-class Heart (Building):
-	sym = '&'
-	color = tcod.darker_red
-	max_hp = 10
-
-class Bait (Building):
-	sym = Heart.sym
-	color = tcod.blue
-	max_hp = 10
-
-class Tower (Building):
-	sym = '@'
-	radius = 15
-	max_hp = 10
-	damage = 1
-	missile = None
-	cost = 0
-
-	def __init__ (self, *args):
-		super(Tower, self).__init__(*args)
-		self.cooldown = False
-		self.hp = self.max_hp
+			self.delete()
 
 	def put (self):
 		self.state.entities.append(self)
@@ -70,24 +50,47 @@ class Tower (Building):
 		self.state.energy += self.cost
 		return self
 
+class Heart (Building):
+	sym = '&'
+	color = tcod.darker_red
+	max_hp = 20
+
+	def delete (self):
+		self.state.is_paused = True
+		return super(Heart, self).delete()
+
+class Bait (Building):
+	sym = Heart.sym
+	color = tcod.pink
+	max_hp = 10
+
+class Tower (Building):
+	radius = 15
+	max_hp = 10
+	damage = 1
+	missile = None
+
+	def __init__ (self, *args):
+		super(Tower, self).__init__(*args)
+		self.cooldown = False
+
 	def update (self):
 		if not self.cooldown:
 			dist_min = None
 			target = None
-			for e in self.state.entities:
-				if isinstance(e, enemies.Enemy):
-					d = util.dist(self.x, self.y, e.x, e.y)
-					if d < (self.radius + 1) and ((dist_min is None) or (d < dist_min)):
-						dist_min = d
-						target = e
+			for e in self.state.entities.enemies():
+				d = util.dist(self.x, self.y, e.x, e.y)
+				if d < (self.radius + 1) and ((dist_min is None) or (d < dist_min)):
+					dist_min = d
+					target = e
 			
 			if target:
 				self._shoot(target)
 
 	def render (self):
 		super(Tower, self).render()
-		# if self.mouse_over:
-		if True:
+		if self.mouse_over:
+		# if True:
 			for x in range(self.x - (self.radius + 1), self.x + (self.radius + 1)):
 				for y in range(self.y - (self.radius + 1), self.y + (self.radius + 1)):
 					if util.dist(self.x, self.y, x, y) < (self.radius + 1):
@@ -122,6 +125,17 @@ class BasicTower (Tower):
 	color = tcod.dark_green
 	missile = BasicMissile
 	cost = 1
+
+class ResearchBuilding (Building):
+	color = tcod.dark_sepia
+	cost = 1
+
+	def __init__ (self, *args):
+		super(ResearchBuilding, self).__init__(*args)
+		self.timer = self.state.timers.start(1000, self._research)
+
+	def _research (self):
+		pass
 
 class AoeExplosion (util.Entity):
 	sym = '*'
