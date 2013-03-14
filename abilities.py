@@ -1,4 +1,5 @@
 import util
+import towers
 
 class Ability (util.Entity):
 	action_time = 0
@@ -12,3 +13,17 @@ class Ability (util.Entity):
 		def rollback ():
 			self.state.entities.remove(self)
 		self.state.timers.start_run_once(self.action_time, rollback)	
+		
+class FakeHeartAbility (Ability):
+	action_time = 1000000000
+	
+	def use (self):
+		fake_heart = towers.FakeHeart(self.state, self.x, self.y)
+		self.state.heart = fake_heart # TODO: Fix multiple fake_hearts
+		self.state.entities.append(fake_heart)
+		def rollback ():
+			fake_heart.die()
+		self.state.timers.start_run_once(self.action_time, rollback)
+			
+	def render (self):
+		pass

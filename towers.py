@@ -33,6 +33,24 @@ class Heart (util.Entity):
 	def die (self):
 		if self in self.state.entities:
 			self.state.entities.remove(self)
+		if self in self.state.hearts:
+			self.state.hearts.remove(self)
+			
+class FakeHeart (Heart):
+	color = tcod.blue
+	
+	def die (self):
+		def _next_heart ():
+			for h in self.state.hearts:
+				if isinstance(h, FakeHeart):
+					return h
+			return self.state.hearts[0] # TODO Maybe IndexError
+		
+		if self in self.state.hearts:
+			self.state.hearts.remove(self)
+		
+		self.state.heart = _next_heart()
+		super(FakeHeart, self).die()
 
 class Tower (util.Entity):
 	sym = '@'

@@ -15,7 +15,7 @@ import util
 import math
 import towers
 import enemies
-
+import abilities
 
 FPS_LIMIT = 60
 WINDOW_TITLE = "TD RL"
@@ -64,6 +64,7 @@ def run ():
 	state.is_paused = False
 	state.map = Map(41, 41)
 	state.entities = entities = util.Entities()
+	state.hearts = []
 
 
 	#enemies
@@ -117,6 +118,7 @@ def run ():
 	heart = towers.Heart(state, state.map.w // 2, state.map.h // 2)
 	entities.append(heart)
 	state.heart = heart
+	state.hearts.append(heart)
 
 	# entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
 	# entities.append(towers.BasicTower(state, heart.x + 1, heart.y))
@@ -152,7 +154,9 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-			entities.append(towers.BasicTower(state, mouse.cx, mouse.cy))
+			#entities.append(towers.BasicTower(state, mouse.cx, mouse.cy))
+			a = abilities.FakeHeartAbility(None, state, mouse.cx, mouse.cy)
+			a.use()
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
