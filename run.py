@@ -135,6 +135,10 @@ def run ():
 	tcod.console_rect(panel, 0, 0, pan_w, pan_h, False, tcod.BKGND_SCREEN)
 	# tcod.console_set_default_background(panel, tcod.black)
 
+	def map_to_entity (cx, cy):
+		for e in state.entities:
+			if (e.x, e.y) == (cx, cy):
+				return e
 
 	key = tcod.Key()
 	mouse = tcod.Mouse()
@@ -153,13 +157,16 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-			#towers.BasicTower(state, mouse.cx, mouse.cy).put()
-			a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
-			a.use()
+			e = map_to_entity(mouse.cx, mouse.cy)
+			if not isinstance(e, towers.Building):
+				towers.BasicTower(state, mouse.cx, mouse.cy).put()
+
+				# a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
+				# a.use()
 		elif mouse.rbutton_pressed:
-			for e in state.entities:
-				if isinstance(e, towers.Tower) and (e.x, e.y) == (mouse.cx, mouse.cy):
-					e.delete()
+			e = map_to_entity(mouse.cx, mouse.cy)
+			if isinstance(e, towers.Tower):
+				e.delete()
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:

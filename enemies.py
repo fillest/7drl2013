@@ -33,7 +33,7 @@ class Enemy (util.Entity):
 			pass
 		else:
 			for e in self.state.entities:
-				if e.x == x and e.y == y and isinstance(e, (towers.Tower, towers.Heart)):
+				if e.x == x and e.y == y and isinstance(e, towers.Building):
 					self.hit(e)
 			
 			self.x = x

@@ -16,28 +16,38 @@ class AoeMissile (util.Entity):
 	color = tcod.red
 
 
-class Heart (util.Entity):
-	sym = '&'
-	color = tcod.darker_red
-	max_hp = 10
-	
+class Building (util.Entity):
+	max_hp = 1
+
 	def __init__ (self, *args):
-		super(Heart, self).__init__(*args)
+		super(Building, self).__init__(*args)
 		self.hp = self.max_hp
-	
+
 	def hurt (self, hp):
 		self.hp -= hp
+
 		if self.hp < 1:
 			self.die()
+
+	def hit (self, e):
+		if e in self.state.entities:
+			e.hurt(self.damage)
 	
 	def die (self):
 		if self in self.state.entities:
 			self.state.entities.remove(self)
-			
-class Bait (Heart):
-	color = tcod.blue
 
-class Tower (util.Entity):
+class Heart (Building):
+	sym = '&'
+	color = tcod.darker_red
+	max_hp = 10
+
+class Bait (Building):
+	sym = Heart.sym
+	color = tcod.blue
+	max_hp = 10
+
+class Tower (Building):
 	sym = '@'
 	radius = 15
 	max_hp = 10
@@ -107,19 +117,6 @@ class Tower (util.Entity):
 		else:
 			m.x = x
 			m.y = y
-
-	def hit (self, e):
-		if e in self.state.entities:
-			e.hurt(self.damage)
-	
-	def hurt (self, hp):
-		self.hp -= hp
-		if self.hp < 1:
-			self.die()
-		
-	def die (self):
-		if self in self.state.entities:
-			self.state.entities.remove(self)
 
 class BasicTower (Tower):
 	color = tcod.dark_green
