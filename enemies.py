@@ -32,16 +32,19 @@ class Enemy (util.Entity):
 		if x is None:
 			pass
 		else:
+			did_hit = False
 			for e in self.state.entities:
 				if e.x == x and e.y == y and isinstance(e, towers.Building):
 					self.hit(e)
+					did_hit = True
 			
-			self.x = x
-			self.y = y
+			if not did_hit:
+				self.x = x
+				self.y = y
 			
 	def hit (self, e):
 		if e in self.state.entities:
-			print 'Enemy {0} hit the {1}. Damage: {2}'.format(self.__class__.__name__, e.__class__.__name__, self.damage)
+			# print 'Enemy {0} hit the {1}. Damage: {2}'.format(self.__class__.__name__, e.__class__.__name__, self.damage)
 			e.hurt(self.damage)
 	
 	def hurt (self, hp):
