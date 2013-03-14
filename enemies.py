@@ -40,8 +40,10 @@ class Enemy (util.Entity):
 			self.die()
 	
 	def die (self):
-		self.state.entities.remove(self)
-		self.state.timers.remove(self.timer)
+		if self in self.state.entities:
+		    self.state.entities.remove(self)
+		if self.timer in self.state.timers:
+		    self.state.timers.remove(self.timer)
 		
 class Rat (Enemy):
 	sym = 'r'
