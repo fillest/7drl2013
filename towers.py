@@ -43,11 +43,22 @@ class Tower (util.Entity):
 	max_hp = 10
 	damage = 1
 	missile = None
+	cost = 0
 
 	def __init__ (self, *args):
 		super(Tower, self).__init__(*args)
 		self.cooldown = False
 		self.hp = self.max_hp
+
+	def put (self):
+		self.state.entities.append(self)
+		self.state.energy -= self.cost
+		return self
+
+	def delete (self):
+		self.state.entities.remove(self)
+		self.state.energy += self.cost
+		return self
 
 	def update (self):
 		if not self.cooldown:
@@ -113,6 +124,7 @@ class Tower (util.Entity):
 class BasicTower (Tower):
 	color = tcod.dark_green
 	missile = BasicMissile
+	cost = 1
 
 class AoeExplosion (util.Entity):
 	sym = '*'
@@ -131,6 +143,7 @@ class AoeExplosion (util.Entity):
 class AoeTower (Tower):
 	color = tcod.dark_orange
 	missile = AoeMissile
+	cost = 2
 
 	def hit (self, target):
 		radius = 2
@@ -149,6 +162,7 @@ class IceTower (Tower):
 	damage = 0.2
 	color = tcod.dark_blue
 	missile = IceMissile
+	cost = 1
 
 	def hit (self, target):
 		target.hurt(self.damage)

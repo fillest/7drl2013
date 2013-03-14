@@ -64,6 +64,7 @@ def run ():
 	state.is_paused = False
 	state.map = Map(41, 41)
 	state.entities = entities = util.Entities()
+	state.energy = 10
 
 
 	#enemies
@@ -118,10 +119,10 @@ def run ():
 	entities.append(heart)
 	state.heart = heart
 
-	# entities.append(towers.BasicTower(state, heart.x - 1, heart.y))
-	# entities.append(towers.BasicTower(state, heart.x + 1, heart.y))
-	entities.append(towers.IceTower(state, heart.x, heart.y - 1))
-	# entities.append(towers.AoeTower(state, heart.x, heart.y + 1))
+	towers.BasicTower(state, heart.x - 1, heart.y).put()
+	towers.BasicTower(state, heart.x + 1, heart.y).put()
+	towers.IceTower(state, heart.x, heart.y - 1).put()
+	towers.AoeTower(state, heart.x, heart.y + 1).put()
 
 
 	#panel
@@ -152,9 +153,13 @@ def run ():
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
-			#entities.append(towers.BasicTower(state, mouse.cx, mouse.cy))
+			#towers.BasicTower(state, mouse.cx, mouse.cy).put()
 			a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
 			a.use()
+		elif mouse.rbutton_pressed:
+			for e in state.entities:
+				if isinstance(e, towers.Tower) and (e.x, e.y) == (mouse.cx, mouse.cy):
+					e.delete()
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
@@ -182,6 +187,8 @@ def run ():
 			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "paused")
 		else:
 			tcod.console_print_ex(0, 0, 0, tcod.BKGND_NONE, tcod.LEFT, " " * len("paused"))
+
+		tcod.console_print_ex(0, 14, 0, tcod.BKGND_NONE, tcod.LEFT, "energy: %s" % state.energy)
 
 		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
 		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Adviser: Eew! Rats.. I have musophobia, I told you.")
