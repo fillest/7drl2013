@@ -42,6 +42,7 @@ class Building (util.Entity):
 			self.delete()
 
 	def put (self):
+		assert self.state.energy > 0
 		self.state.entities.append(self)
 		self.state.energy -= self.cost
 		return self
