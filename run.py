@@ -223,7 +223,7 @@ def run ():
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
-				popup.set_params(e.x, e.y, e.__class__.__name__)
+				popup.set_params(e.x + 1, e.y, e.__class__.__name__)
 				e.mouse_over = True
 			else:
 				e.mouse_over = False
