@@ -184,12 +184,6 @@ def run ():
 				state.timers.pause()
 			state.is_paused = not state.is_paused
 
-		entity_under_mouse = map_to_entity(mouse.cx, mouse.cy)
-		if entity_under_mouse:
-			px, py = mouse.cx, mouse.cy
-			#if isinstance(entity_under_mouse, util.Building):
-			popup.set_params(px, py, entity_under_mouse.__class__.__name__)
-
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
@@ -206,6 +200,7 @@ def run ():
 
 		for e in entities:
 			if e.x == mouse.cx and e.y == mouse.cy:
+				popup.set_params(e.x, e.y, e.__class__.__name__)
 				e.mouse_over = True
 			else:
 				e.mouse_over = False
