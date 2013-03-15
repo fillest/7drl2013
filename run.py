@@ -54,7 +54,7 @@ class Popup (object):
 		if self.text:
 			tcod.console_print_ex(self.obj, 0, 0, tcod.BKGND_OVERLAY, tcod.LEFT, self.text)
 			tcod.console_blit(self.obj, 0, 0, self.width, self.height, 0, self.x, self.y)
-		#self.text = None
+		self.text = None
 
 
 class Map (object):
