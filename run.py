@@ -6,7 +6,6 @@ if '32' in platform.architecture()[0]:
 	os.chdir("libtcod32-1.5.2")
 else:
 	os.chdir("libtcod-1.5.2")
-# sys.path.append("tcod-1.5.2/python") 
 sys.path.append("python") 
 import libtcodpy as tcod
 import random
@@ -28,6 +27,16 @@ tile_types = dict(
 		color = tcod.darker_green,
 	)
 )
+
+hotkeys = {
+	tcod.KEY_0: towers.BasicTower,
+	tcod.KEY_1: towers.AoeTower,
+	tcod.KEY_2: towers.IceTower,
+	tcod.KEY_3: towers.ResearchBuilding,
+	tcod.KEY_4: abilities.BaitAbility,
+}
+
+IN_HAND = hotkeys[tcod.KEY_0]
 
 class state (object):
 	pass
@@ -78,6 +87,8 @@ class Map (object):
 				# tcod.console_put_char_ex(0, x + 1, y + 1, cell, color.grass, 0)
 
 def run ():
+	global IN_HAND
+	
 	os.putenv('SDL_VIDEO_CENTERED', '1')
 	tcod.sys_set_fps(FPS_LIMIT)
 	tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
@@ -148,10 +159,10 @@ def run ():
 	entities.append(heart)
 	state.heart = heart
 
-	towers.BasicTower(state, heart.x - 1, heart.y).put()
-	towers.ResearchBuilding(state, heart.x + 1, heart.y).put()
-	towers.IceTower(state, heart.x, heart.y - 1).put()
-	towers.AoeTower(state, heart.x, heart.y + 1).put()
+	#towers.BasicTower(state, heart.x - 1, heart.y).put()
+	#towers.ResearchBuilding(state, heart.x + 1, heart.y).put()
+	#towers.IceTower(state, heart.x, heart.y - 1).put()
+	#towers.AoeTower(state, heart.x, heart.y + 1).put()
 
 
 	#panel
@@ -184,16 +195,22 @@ def run ():
 			else:
 				state.timers.pause()
 			state.is_paused = not state.is_paused
-
+		
+		for hotkey, action in hotkeys.iteritems():
+			if key.vk == hotkey:
+				IN_HAND = action
+		
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
 			e = map_to_entity(mouse.cx, mouse.cy)
 			if not isinstance(e, towers.Building):
-				# towers.ResearchTower(state, mouse.cx, mouse.cy).put()
-
-				a = abilities.BaitAbility(None, state, mouse.cx, mouse.cy)
-				a.use()
+				# Put current tower / use current ability
+				if issubclass(IN_HAND, towers.Building) or issubclass(IN_HAND, towers.Tower):
+					IN_HAND(state, mouse.cx, mouse.cy).put()
+				elif isinstance(IN_HAND, abilities.Ability):
+					IN_HAND(e, state, mouse.cx, mouse.cy).use()
+				
 		elif mouse.rbutton_pressed:
 			e = map_to_entity(mouse.cx, mouse.cy)
 			if isinstance(e, towers.Tower):
@@ -230,12 +247,11 @@ def run ():
 
 		tcod.console_print_ex(0, 14, 0, tcod.BKGND_NONE, tcod.LEFT, "energy: %s" % state.energy)
 
-		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "123 The quick brown fox jumps over the lazy dog.")
+		tcod.console_print_ex(panel, 0, 0, tcod.BKGND_NONE, tcod.LEFT, "Hotkeys: 0 - BT, 1 - AT, 2 - IT, 3 - RB, 4 - BA")
 		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Adviser: Eew! Rats.. I have musophobia, I told you.")
 		# tcod.console_print_ex(panel, 0, 1, tcod.BKGND_NONE, tcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
 		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
 		popup.show()
-
 
 		tcod.console_flush()
 
