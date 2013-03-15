@@ -210,5 +210,5 @@ class IceTower (Tower):
 				target.timer.time_buf /= 3
 				target.is_debuffed = False
 			self.rollback_timer = self.state.timers.start_run_once(1000, rollback)
-		else:
+		elif getattr(self, 'rollback_timer', False):
 			self.rollback_timer.reset()
