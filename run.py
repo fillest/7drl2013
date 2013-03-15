@@ -31,6 +31,32 @@ tile_types = dict(
 class state (object):
 	pass
 
+class Popup (object):
+	width = 10
+	height = 5
+	x = 0
+	y = 0
+	text = None
+
+	def __init__ (self):
+		self.obj = tcod.console_new(self.width, self.height)
+		tcod.console_set_default_foreground(self.obj, tcod.white)
+
+		tcod.console_set_default_background(self.obj, tcod.Color(5, 5, 5))
+		tcod.console_rect(self.obj, 0, 0, self.width, self.height, False, tcod.BKGND_SCREEN)
+
+	def set_params (self, x, y, text):
+		self.text = text
+		self.x = x
+		self.y = y
+
+	def show (self):
+		if self.text:
+			tcod.console_print_ex(self.obj, 0, 0, tcod.BKGND_OVERLAY, tcod.LEFT, self.text)
+			tcod.console_blit(self.obj, 0, 0, self.width, self.height, 0, self.x, self.y)
+		#self.text = None
+
+
 class Map (object):
 	def __init__ (self, w, h):
 		assert w % 2 == 1, "heart is in the center of map"
@@ -54,6 +80,7 @@ def run ():
 	tcod.sys_set_fps(FPS_LIMIT)
 	tcod.console_set_custom_font('data/fonts/dejavu16x16_gs_tc.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
 	tcod.console_init_root(60, 50, WINDOW_TITLE, False)
+	
 
 	# c1 = tcod.Color(255, 255, 255)
 	# tcod.console_set_default_background(0, c1)
@@ -135,6 +162,8 @@ def run ():
 	tcod.console_rect(panel, 0, 0, pan_w, pan_h, False, tcod.BKGND_SCREEN)
 	# tcod.console_set_default_background(panel, tcod.black)
 
+	popup = Popup()
+
 	def map_to_entity (cx, cy):
 		for e in state.entities:
 			if (e.x, e.y) == (cx, cy):
@@ -153,6 +182,12 @@ def run ():
 			else:
 				state.timers.pause()
 			state.is_paused = not state.is_paused
+
+		entity_under_mouse = map_to_entity(mouse.cx, mouse.cy)
+		if entity_under_mouse:
+			px, py = mouse.cx, mouse.cy
+			#if isinstance(entity_under_mouse, util.Building):
+			popup.set_params(px, py, entity_under_mouse.__class__.__name__)
 
 		if mouse.lbutton_pressed:
 			print "left mouse, cell:", mouse.cx, mouse.cy
@@ -201,6 +236,7 @@ def run ():
 		tcod.console_print_ex(panel, 0, 2, tcod.BKGND_NONE, tcod.LEFT, "Adviser: Eew! Rats.. I have musophobia, I told you.")
 		# tcod.console_print_ex(panel, 0, 1, tcod.BKGND_NONE, tcod.LEFT, "Эх, чужд кайф, сплющь объём вши, грызя цент.")
 		tcod.console_blit(panel, 0, 0, pan_w, pan_h, 0, 0, 43)
+		popup.show()
 
 
 		tcod.console_flush()
