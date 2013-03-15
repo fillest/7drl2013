@@ -10,7 +10,6 @@ else:
 sys.path.append("python") 
 import libtcodpy as tcod
 import random
-from random import randint
 import util
 import math
 import towers
@@ -100,13 +99,13 @@ def run ():
 	#enemies
 	map_sides = [
 		#top
-		lambda: (randint(0, state.map.w - 1), 0),
+		lambda: (random.randint(0, state.map.w - 1), 0),
 		#bottom
-		lambda: (randint(0, state.map.w - 1), state.map.h - 1),
+		lambda: (random.randint(0, state.map.w - 1), state.map.h - 1),
 		#left
-		lambda: (0, randint(0, state.map.h - 1)),
+		lambda: (0, random.randint(0, state.map.h - 1)),
 		#right				
-		lambda: (state.map.w - 1, randint(0, state.map.h - 1)),			
+		lambda: (state.map.w - 1, random.randint(0, state.map.h - 1)),			
 	]
 	state.enemy_i = 0
 	
