@@ -16,6 +16,8 @@ import math
 import towers
 import enemies
 import abilities
+import collections
+
 
 FPS_LIMIT = 60
 WINDOW_TITLE = "TD RL"
@@ -210,6 +212,7 @@ def run ():
 			state.timers.update()
 
 		if not state.is_paused:
+			state.targets_towers = collections.defaultdict(list)
 			for e in entities:
 				e.update()
 

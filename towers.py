@@ -1,6 +1,7 @@
 import util
 import libtcodpy as tcod
 import enemies
+import operator
 
 
 class Missile (util.Entity):
@@ -76,15 +77,36 @@ class Tower (Building):
 
 	def update (self):
 		if not self.cooldown:
-			dist_min = None
-			target = None
+			# dist_min = None
+			# target = None
+			# for e in self.state.entities.enemies():
+			# 	d = util.dist(self.x, self.y, e.x, e.y)
+			# 	if d < (self.radius + 1) and ((dist_min is None) or (d < dist_min)):
+			# 		dist_min = d
+			# 		target = e
+			
+			preferred_targets = []
+			other_targets = []
 			for e in self.state.entities.enemies():
 				d = util.dist(self.x, self.y, e.x, e.y)
-				if d < (self.radius + 1) and ((dist_min is None) or (d < dist_min)):
-					dist_min = d
-					target = e
-			
+				if d < (self.radius + 1):
+					if e in self.state.targets_towers:
+						total_damage = sum([t.damage for t in self.state.targets_towers[e]])
+						if total_damage < e.hp:
+							preferred_targets.append((d, e))
+						else:
+							other_targets.append((d, e))
+					else:
+						preferred_targets.append((d, e))
+
+			target = None
+			if preferred_targets:
+				_d, target = sorted(preferred_targets, key = operator.itemgetter(0))[0]
+			elif other_targets:
+				_d, target = sorted(other_targets, key = operator.itemgetter(0))[0]
+
 			if target:
+				self.state.targets_towers[target].append(self)
 				self._shoot(target)
 
 	def render (self):
