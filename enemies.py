@@ -1,6 +1,7 @@
 import util
 import libtcodpy as tcod
 import towers
+import items
 
 
 class Enemy (util.Entity):
@@ -52,7 +53,10 @@ class Enemy (util.Entity):
 		if self.hp < 1:
 			self.die()
 	
-	def die (self):
+	def die (self):		
+		# TODO: prevent a double drop (add an is_alive attr?)
+		self.state.entities.append(items.EnergyItem(self.state, self.x, self.y))
+		
 		if self in self.state.entities:
 		    self.state.entities.remove(self)
 		if self.timer in self.state.timers:

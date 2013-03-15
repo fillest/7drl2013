@@ -14,6 +14,7 @@ import math
 import towers
 import enemies
 import abilities
+import items
 import collections
 
 
@@ -105,6 +106,7 @@ def run ():
 	state.map = Map(41, 41)
 	state.entities = entities = util.Entities()
 	state.energy = 10
+	state.inventory = [] # TODO
 
 
 	#enemies
@@ -204,7 +206,10 @@ def run ():
 			print "left mouse, cell:", mouse.cx, mouse.cy
 
 			e = map_to_entity(mouse.cx, mouse.cy)
-			if not isinstance(e, towers.Building):
+			if isinstance(e, items.Item):
+				e.pick_up()
+			
+			elif not isinstance(e, towers.Building):
 				# Put current tower / use current ability
 				if issubclass(IN_HAND, towers.Building) or issubclass(IN_HAND, towers.Tower):
 					IN_HAND(state, mouse.cx, mouse.cy).put()

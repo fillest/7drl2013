@@ -2,7 +2,6 @@ import libtcodpy as tcod
 import random
 import math
 
-
 class Entity (object):
 	color = tcod.white
 	sym = None
@@ -19,7 +18,6 @@ class Entity (object):
 
 	def update (self):
 		pass
-
 
 import enemies
 
