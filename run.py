@@ -153,7 +153,29 @@ def run ():
 			state.enemy_i += 1
 
 		state.enemy_i += 1
-	state.timers.start(500, spawn_enemy)
+	# state.timers.start(500, spawn_enemy)
+
+
+	def gen_wave ():
+		state.wave_i = 0
+		while True:
+			for t in gen_enemy_type():
+				x, y = random.choice(map_sides)()
+				entities.append(t(state, x, y))
+				yield
+
+			state.wave_i += 1
+
+	def gen_enemy_type ():
+		planned_score = int(math.exp(state.wave_i + 3))
+		print "wave", state.wave_i, "planned_score", planned_score
+		score_buf = 0
+		while score_buf < planned_score:
+			enemy_type = random.choice([t for t in enemies.enemy_classes() if t.score <= planned_score - score_buf])
+			score_buf += enemy_type.score
+			print enemy_type
+			yield enemy_type
+	state.timers.start(500, gen_wave().next)
 
 
 	#towers

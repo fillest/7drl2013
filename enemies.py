@@ -4,7 +4,18 @@ import towers
 import items
 
 
+registered_enemies = []
+def enemy_classes ():
+	return [c for c in registered_enemies if c != Enemy]
+
+class EnemyMeta (type):
+	def __init__ (class_, name, bases, attrs):
+		super(EnemyMeta, class_).__init__(name, bases, attrs)
+		registered_enemies.append(class_)
+
 class Enemy (util.Entity):
+	__metaclass__ = EnemyMeta
+
 	max_hp = 1
 	speed = 1
 	damage = 1
@@ -65,9 +76,26 @@ class Enemy (util.Entity):
 class Rat (Enemy):
 	sym = 'r'
 	color = tcod.lighter_sepia
+	score = 1
 
 class Wolf (Enemy):
 	sym = 'w'
 	color = tcod.lighter_grey
 	max_hp = 2
 	speed = 2
+	score = 2
+
+class Savage (Enemy):
+	sym = '@'
+	color = tcod.darker_pink
+	max_hp = 4
+	speed = 1
+	score = 2
+
+class Elefant (Enemy):
+	sym = 'e'
+	color = tcod.lighter_grey
+	max_hp = 1 * 16
+	speed = 0.5
+	score = 16
+
