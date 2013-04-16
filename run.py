@@ -2,10 +2,13 @@
 import sys
 import os
 import platform
-if '32' in platform.architecture()[0]:
-	os.chdir("libtcod32-1.5.2")
+if platform.system() == 'Windows':
+	os.chdir("libtcod-1.5.2-win")
 else:
-	os.chdir("libtcod-1.5.2")
+	if '32' in platform.architecture()[0]:
+		os.chdir("libtcod32-1.5.2")
+	else:
+		os.chdir("libtcod-1.5.2")
 sys.path.append("python") 
 import libtcodpy as tcod
 import random
